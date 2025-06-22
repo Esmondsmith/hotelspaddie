@@ -1,0 +1,35 @@
+//API for signup for both hotel owner and general user. Tested with Postman and is working fine, the payload has been used
+
+
+
+
+Hotel Owner
+To sign up Hotel
+curl --location 'https://zodr.zodml.org/entity/user?_format=json' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--header 'Authorization: Basic dGVzdG1hbjpUaWdlcnMzbWUuJA==' \
+--data-raw '{
+  "name": [{ "value": "seyi" }],
+  "mail": [{ "value": "seyi@gmail.com" }],
+  "pass": [{ "value": "UserPassword123" }],
+  "status": [{ "value": true }],
+  "roles": [{ "target_id": "hotel_owner" }]
+}
+'
+
+
+HOtel User
+To sign up New Guest or Hotel User
+curl --location 'https://zodr.zodml.org/entity/user?_format=json' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--header 'Authorization: Basic dGVzdG1hbjpUaWdlcnMzbWUuJA==' \
+--data-raw '{
+  "name": [{ "value": "guest-seyi" }],
+  "mail": [{ "value": "seyi@user.com" }],
+  "pass": [{ "value": "UserPassword123" }],
+  "status": [{ "value": true }],
+  "roles": [{ "target_id": "hotel_user" }]
+}
+'
