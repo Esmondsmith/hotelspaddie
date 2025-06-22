@@ -214,8 +214,6 @@ const HotelLandingPage = () => {
           </div>
         </div>
       </section>
-
-
 </div>
 )}
 
