@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Calendar, Users, MapPin, Star, Download, Apple, Play } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Calendar, Users, MapPin, Star, Download, Apple, Play, Loader } from 'lucide-react';
 import './CSS/Hotels.css'
 import Navbar from '../Components/Navbar/Navbar';
 
@@ -12,14 +12,89 @@ const Hotels = () => {
     guests: '2 guests'
   });
 
-  const handleInputChange = (field, value) => {
-    setSearchData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const [hotels, setHotels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch hotels from API
+  useEffect(() => {
+    fetchHotels();
+  }, []);
+
+  const fetchHotels = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('http://localhost:3001/api/hotels', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch hotels');
+      }
+
+      const data = await response.json();
+      console.log('Hotels data:', data);
+      
+      // Transform API data to match our UI structure
+      const transformedHotels = transformHotelsData(data);
+      setHotels(transformedHotels);
+    } catch (error) {
+      console.error('Error fetching hotels:', error);
+      setError(error.message);
+      // Fallback to mock data if API fails
+      setHotels(getFallbackHotels());
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const bestPicked = [
+  // Transform API data to match our UI structure
+  const transformHotelsData = (apiData) => {
+    // If API returns an array, use it directly
+    if (Array.isArray(apiData)) {
+      return apiData.map((hotel, index) => ({
+        id: hotel.id || index + 1,
+        name: hotel.name || hotel.title || `Hotel ${index + 1}`,
+        location: hotel.location || hotel.address || hotel.city || 'Location not specified',
+        price: hotel.price ? `$${hotel.price}` : '$199',
+        rating: hotel.rating || hotel.stars || 4.5,
+        image: hotel.image || hotel.photo || getDefaultHotelImage(index),
+        description: hotel.description || hotel.summary || '',
+        amenities: hotel.amenities || []
+      }));
+    }
+    
+    // If API returns an object with data property
+    if (apiData.data && Array.isArray(apiData.data)) {
+      return transformHotelsData(apiData.data);
+    }
+    
+    // Fallback to mock data
+    return getFallbackHotels();
+  };
+
+  // Get default hotel images for fallback
+  const getDefaultHotelImage = (index) => {
+    const defaultImages = [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop"
+    ];
+    return defaultImages[index % defaultImages.length];
+  };
+
+  // Fallback hotels data
+  const getFallbackHotels = () => [
     {
       id: 1,
       name: "Luxury Ocean Resort",
@@ -70,40 +145,59 @@ const Hotels = () => {
     }
   ];
 
-  const topRated = [
-    {
-      id: 1,
-      name: "Grand Palace Hotel",
-      location: "Tokyo",
-      price: "$349",
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400&h=300&fit=crop"
-    },
-    {
-      id: 2,
-      name: "Seaside Retreat",
-      location: "Santorini",
-      price: "$419",
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop"
-    },
-    {
-      id: 3,
-      name: "Urban Luxury Suite",
-      location: "London",
-      price: "$289",
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&h=300&fit=crop"
-    },
-    {
-      id: 4,
-      name: "Tropical Villa",
-      location: "Thailand",
-      price: "$259",
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1587294363867-c4b6ed4dc4a6?w=400&h=300&fit=crop"
-    }
-  ];
+  const handleInputChange = (field, value) => {
+    setSearchData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Split hotels into best picked and top rated
+  const bestPicked = hotels.slice(0, 6);
+  const topRated = hotels.slice(0, 4);
+
+  // Loading component
+  const LoadingSpinner = () => (
+    <div className="loading-container" style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '40px',
+      fontSize: '18px',
+      color: '#666'
+    }}>
+      <Loader className="animate-spin" size={24} style={{ marginRight: '10px' }} />
+      Loading hotels...
+    </div>
+  );
+
+  // Error component
+  const ErrorMessage = () => (
+    <div className="error-container" style={{
+      textAlign: 'center',
+      padding: '40px',
+      color: '#dc2626',
+      backgroundColor: '#fee2e2',
+      borderRadius: '8px',
+      margin: '20px 0'
+    }}>
+      <p>Failed to load hotels. Showing sample data instead.</p>
+      <button 
+        onClick={fetchHotels}
+        style={{
+          marginTop: '10px',
+          padding: '8px 16px',
+          backgroundColor: '#dc2626',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        Try Again
+      </button>
+    </div>
+  );
 
   return (
     <div className="landing-page">
