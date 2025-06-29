@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './BestHotels.css';
 import { Star, MapPin, Wifi, Car, Dumbbell, Coffee } from 'lucide-react';
 
@@ -6,6 +7,7 @@ const BestHotels = () => {
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBestHotels();
@@ -162,7 +164,7 @@ const BestHotels = () => {
                     </div>
                   )}
                   
-                  <button className="view-details-btn">
+                  <button className="view-details-btn" onClick={() => navigate(`/listing/${hotel.uuid || hotel.nid}`)}>
                     View Details
                   </button>
                 </div>

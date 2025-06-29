@@ -69,6 +69,36 @@ app.get('/api/hotels', async (req, res) => {
   }
 });
 
+// New endpoint for fetching hotel rooms
+app.get('/api/hotel-rooms', async (req, res) => {
+  try {
+    console.log('Fetching hotel rooms from external API...');
+    
+    const response = await fetch('https://zodr.zodml.org/api/hotel-rooms/', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Hotel Rooms API response status:', response.status);
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('Hotel Rooms API Error!', text);
+      return res.status(response.status).json({error:'Failed to fetch hotel rooms!', details: text});
+    }
+
+    const data = await response.json();
+    console.log('Hotel Rooms API success response:', JSON.stringify(data, null, 2));
+    res.json(data);
+  } catch (error) {
+    console.error('Hotel Rooms API error:', error);
+    res.status(500).json({error:'Failed to fetch hotel rooms!', details: error.toString()});
+  }
+});
+
 // Start server
 const port = 3001;
 app.listen(port, () => console.log(`Server is listening on http://localhost:${port}`));
