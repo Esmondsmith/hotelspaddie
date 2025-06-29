@@ -72,9 +72,12 @@ app.get('/api/hotels', async (req, res) => {
 // New endpoint for fetching hotel rooms
 app.get('/api/hotel-rooms', async (req, res) => {
   try {
-    console.log('Fetching hotel rooms from external API...');
-    
-    const response = await fetch('https://zodr.zodml.org/api/hotel-rooms/', {
+    const { nid } = req.query;
+    if (!nid) {
+      return res.status(400).json({ error: 'Missing nid parameter' });
+    }
+    const url = `https://zodr.zodml.org/api/hotel-rooms/?nid=${encodeURIComponent(nid)}`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -82,19 +85,19 @@ app.get('/api/hotel-rooms', async (req, res) => {
       }
     });
 
-    console.log('Hotel Rooms API response status:', response.status);
-
     if (!response.ok) {
       const text = await response.text();
-      console.error('Hotel Rooms API Error!', text);
       return res.status(response.status).json({error:'Failed to fetch hotel rooms!', details: text});
     }
 
     const data = await response.json();
-    console.log('Hotel Rooms API success response:', JSON.stringify(data, null, 2));
+    console.log("hotelRooms API response:", data);
+
+    if (!Array.isArray(data)) {
+      return res.status(500).json({error:'Failed to fetch hotel rooms!', details: 'No rooms found or error fetching rooms.'});
+    }
     res.json(data);
   } catch (error) {
-    console.error('Hotel Rooms API error:', error);
     res.status(500).json({error:'Failed to fetch hotel rooms!', details: error.toString()});
   }
 });
@@ -107,35 +110,3 @@ app.listen(port, () => console.log(`Server is listening on http://localhost:${po
 
 
 
-// const express = require('express');
-// const cors = require('cors'); 
-// const fetch = require('node-fetch'); 
-
-// const app = express();
-
-// app.use(cors()); 
-// app.use(express.json());
-
-// app.post('/api/Register', async (req, res) => {
-//   try {
-//     const response = await fetch('https://zodr.zodml.org/user/Register', {
-//       method: 'POST',
-//       headers: {
-//         Authorization: 'Basic dGVzdG1hbjpUaWdlcnMzbWUuJA==',
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(req.body)
-//     });
-
-//     const data = await response.json();
-
-//     res.status(response.status).json(data);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({error: error.toString()});
-//   }
-// });
-
-// // Start server
-// const port = 5000;
-// app.listen(port, () => console.log(`Server started on http://localhost:${port}`));

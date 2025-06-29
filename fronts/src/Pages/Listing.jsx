@@ -29,14 +29,25 @@ const Listing = () => {
 
         // Fetch rooms for this hotel using nid as a query param
         const roomsRes = await fetch(`http://localhost:3001/api/hotel-rooms?nid=${foundHotel.nid}`);
-        const hotelRooms = await roomsRes.json();
-        console.log("hotelRooms API response:", hotelRooms);
-        if (!Array.isArray(hotelRooms)) {
-          setError("No rooms found or error fetching rooms.");
-          setRooms([]);
-          return;
+        const hotelRoomsData = await roomsRes.json();
+        
+        // Debug: Log the response to see its structure
+        console.log("Rooms API response:", hotelRoomsData);
+        
+        // Handle different response formats
+        let roomsArray = [];
+        if (Array.isArray(hotelRoomsData)) {
+          roomsArray = hotelRoomsData;
+        } else if (hotelRoomsData && Array.isArray(hotelRoomsData.data)) {
+          roomsArray = hotelRoomsData.data;
+        } else if (hotelRoomsData && Array.isArray(hotelRoomsData.rooms)) {
+          roomsArray = hotelRoomsData.rooms;
+        } else if (hotelRoomsData && typeof hotelRoomsData === 'object') {
+          // If it's an object with room data, convert to array
+          roomsArray = Object.values(hotelRoomsData);
         }
-        setRooms(hotelRooms);
+        
+        setRooms(roomsArray);
       } catch (err) {
         console.error("Error fetching hotel or rooms:", err);
         setError("Failed to load hotel or rooms.");
