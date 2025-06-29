@@ -11,7 +11,7 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-section">
-          <h3>BookStaySuite</h3>
+          <h3>Hotels Paddie</h3>
           <p>Find and book the perfect hotel for your next adventure.</p>
           <div className="social-links">
             <a href="#" aria-label="Facebook">f</a>
@@ -44,7 +44,7 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Contact Info</h4>
           <ul>
-            <li>📧 support@bookstaysuite.com</li>
+            <li>📧 support@hotelsPaddie.com</li>
             <li>📞 +1 (555) 123-4567</li>
             <li>📍 123 Hotel Street, City, State</li>
           </ul>
@@ -52,7 +52,7 @@ const Footer = () => {
       </div>
       
       <div className="footer-bottom">
-        <p>&copy; 2024 BookStaySuite. All rights reserved.</p>
+        <p>&copy; 2025 Hotels Paddie. All rights reserved.</p>
       </div>
     </footer>
   );
