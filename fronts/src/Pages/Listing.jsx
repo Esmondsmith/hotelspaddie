@@ -21,14 +21,26 @@ const Listing = () => {
         const foundHotel = hotels.find(h => h.uuid === hotelId || h.nid === hotelId);
         setHotel(foundHotel);
 
-        // Fetch all rooms and filter by hotelId (assuming room has hotel_uuid or hotel_nid)
-        const roomsRes = await fetch("http://localhost:3001/api/hotel-rooms");
-        const allRooms = await roomsRes.json();
-        // Try to match by hotel uuid or nid
-        const filteredRooms = allRooms.filter(r => r.hotel_uuid === hotelId || r.hotel_nid === hotelId);
-        setRooms(filteredRooms);
+        if (!foundHotel || !foundHotel.nid) {
+          setRooms([]);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch rooms for this hotel using nid as a query param
+        const roomsRes = await fetch(`http://localhost:3001/api/hotel-rooms?nid=${foundHotel.nid}`);
+        const hotelRooms = await roomsRes.json();
+        console.log("hotelRooms API response:", hotelRooms);
+        if (!Array.isArray(hotelRooms)) {
+          setError("No rooms found or error fetching rooms.");
+          setRooms([]);
+          return;
+        }
+        setRooms(hotelRooms);
       } catch (err) {
+        console.error("Error fetching hotel or rooms:", err);
         setError("Failed to load hotel or rooms.");
+        setRooms([]); // Ensure rooms is always an array
       } finally {
         setLoading(false);
       }
@@ -56,7 +68,7 @@ const Listing = () => {
         </div>
       </div>
       <div className="listing-rooms-list">
-        {rooms.length === 0 ? (
+        {!Array.isArray(rooms) || rooms.length === 0 ? (
           <div className="listing-no-rooms">No rooms available for this hotel.</div>
         ) : (
           rooms.map((room, idx) => (
@@ -80,4 +92,4 @@ const Listing = () => {
   );
 };
 
-export default Listing; 
+export default Listing;
