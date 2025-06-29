@@ -88,9 +88,10 @@ const SignUp = () => {
         name: [{ value: username }],
         mail: [{ value: formData.email.trim() }],
         pass: [{ value: formData.password }],
-        status: [{ value: true }],
-        roles: [{ target_id: formData.userType }]
+        status: [{ value: true }]
       };
+
+      console.log('Sending registration payload:', JSON.stringify(payload, null, 2));
 
       // Use local server endpoint to avoid CORS issues
       const apiUrl = 'http://localhost:3001/api/Register';
@@ -124,7 +125,24 @@ const SignUp = () => {
         }, 2000);
 
       } else {
-        setError(data.error || data.message || 'Registration failed. Please try again.');
+        // Try to parse error details
+        let errorMessage = 'Registration failed. Please try again.';
+        try {
+          if (data.details) {
+            // Parse the details if it's a JSON string
+            const details = typeof data.details === 'string' ? JSON.parse(data.details) : data.details;
+            if (details.message) {
+              errorMessage = details.message;
+            }
+          } else if (data.error) {
+            errorMessage = data.error;
+          } else if (data.message) {
+            errorMessage = data.message;
+          }
+        } catch (parseError) {
+          console.error('Error parsing response:', parseError);
+        }
+        setError(errorMessage);
       }
 
     } catch (error) {
