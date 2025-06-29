@@ -152,10 +152,6 @@ const Hotels = () => {
     }));
   };
 
-  // Split hotels into best picked and top rated
-  const bestPicked = hotels.slice(0, 6);
-  const topRated = hotels.slice(0, 4);
-
   // Loading component
   const LoadingSpinner = () => (
     <div className="loading-container" style={{
@@ -217,56 +213,6 @@ const Hotels = () => {
         </div>
       </section>
 
-      {/* Best Picked Section */}
-      <section className="hotels-section">
-        <div className="container">
-          <h2>Best Picked</h2>
-          <div className="hotels-grid">
-            {bestPicked.map((hotel) => (
-              <div key={hotel.id} className="hotel-card">
-                <div className="hotel-image">
-                  <img src={hotel.image} alt={hotel.name} />
-                  <div className="hotel-rating">
-                    <Star size={16} fill="currentColor" />
-                    {hotel.rating}
-                  </div>
-                </div>
-                <div className="hotel-info">
-                  <h3>{hotel.name}</h3>
-                  <p className="location">{hotel.location}</p>
-                  <div className="price">{hotel.price}/night</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Top Rated Section */}
-      <section className="hotels-section">
-        <div className="container">
-          <h2>Top Rated</h2>
-          <div className="hotels-grid">
-            {topRated.map((hotel) => (
-              <div key={hotel.id} className="hotel-card">
-                <div className="hotel-image">
-                  <img src={hotel.image} alt={hotel.name} />
-                  <div className="hotel-rating">
-                    <Star size={16} fill="currentColor" />
-                    {hotel.rating}
-                  </div>
-                </div>
-                <div className="hotel-info">
-                  <h3>{hotel.name}</h3>
-                  <p className="location">{hotel.location}</p>
-                  <div className="price">{hotel.price}/night</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Mobile App Section */}
       <section className="app-section">
         <div className="container">
@@ -309,9 +255,8 @@ const Hotels = () => {
           </div>
         </div>
       </section>
-
-
-</div>
-)}
+    </div>
+  );
+}
 
 export default Hotels
