@@ -101,7 +101,6 @@ app.get('/api/hotel-rooms', async (req, res) => {
     res.status(500).json({error:'Failed to fetch hotel rooms!', details: error.toString()});
   }
 });
-
 // Start server
 const port = 3001;
 app.listen(port, () => console.log(`Server is listening on http://localhost:${port}`));
