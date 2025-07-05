@@ -28,7 +28,7 @@ const Hotels = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Available options for dropdowns
+  // Available options for state dropdowns
   const [states] = useState([
     { id: 32, name: 'Lagos' },
     { id: 33, name: 'Abuja' },
@@ -37,6 +37,7 @@ const Hotels = () => {
     { id: 36, name: 'Ibadan' }
   ]);
 
+  // Available options for amenities dropdowns
   const [amenitiesOptions] = useState([
     { id: 20, name: 'Wi-Fi' },
     { id: 21, name: 'Parking' },
@@ -48,6 +49,7 @@ const Hotels = () => {
     { id: 27, name: 'Business Center' }
   ]);
 
+  // Available options for rating dropdowns
   const ratingOptions = [
     { value: 1, label: '1 Star' },
     { value: 2, label: '2 Stars' },

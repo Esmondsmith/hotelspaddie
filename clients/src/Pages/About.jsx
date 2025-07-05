@@ -7,7 +7,7 @@ const About = () => {
   return (
     <div>
         <Navbar />
-        About
+        <h1>ABOUT PAGE</h1>
         
     </div>
   )
