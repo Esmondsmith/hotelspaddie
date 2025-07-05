@@ -40,6 +40,199 @@ app.post('/api/Register', async (req, res) => {
   }
 });
 
+// Login endpoint
+// app.post('/api/login', async (req, res) => {
+//   try {
+//     console.log('Received login request:', JSON.stringify(req.body, null, 2));
+
+//     const { username, password } = req.body;
+
+//     if (!username || !password) {
+//       return res.status(400).json({ error: 'Username and password are required' });
+//     }
+
+//     // Try different login endpoints and methods
+//     let response;
+//     let errorDetails = '';
+    
+//     // Method 1: Try the OAuth token endpoint (most common for Drupal)
+//     try {
+//       response = await fetch('https://zodr.zodml.org/oauth/token', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/x-www-form-urlencoded',
+//           'Accept': 'application/json'
+//         },
+//         body: new URLSearchParams({
+//           grant_type: 'password',
+//           username,
+//           password,
+//           client_id: 'testman',
+//           client_secret: 'Tigers3me.$'
+//         })
+//       });
+      
+//       if (response.ok) {
+//         console.log('Login successful with OAuth method');
+//       } else {
+//         errorDetails = await response.text();
+//         console.log('OAuth method failed:', errorDetails);
+//       }
+//     } catch (err) {
+//       console.log('OAuth method error:', err.message);
+//     }
+    
+//     // Method 2: If OAuth fails, try simple JSON login
+//     if (!response || !response.ok) {
+//       try {
+//         response = await fetch('https://zodr.zodml.org/api/custom-login', {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             'Accept': 'application/json',
+//             'Authorization': 'Basic dGVzdG1hbjpUaWdlcnMzbWUuJA=='
+//           },
+//           body: JSON.stringify({ username, password })
+//         });
+        
+//         if (response.ok) {
+//           console.log('Login successful with JSON method');
+//         } else {
+//           errorDetails = await response.text();
+//           console.log('JSON method failed:', errorDetails);
+//         }
+//       } catch (err) {
+//         console.log('JSON method error:', err.message);
+//       }
+//     }
+    
+//     // Method 3: Try custom login endpoint as fallback
+//     if (!response || !response.ok) {
+//       try {
+//         response = await fetch('https://zodr.zodml.org/api/custom-login', {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             'Accept': 'application/json',
+//             'Authorization': 'Basic dGVzdG1hbjpUaWdlcnMzbWUuJA=='
+//           },
+//           body: JSON.stringify({ username, password })
+//         });
+        
+//         if (response.ok) {
+//           console.log('Login successful with custom-login method');
+//         } else {
+//           errorDetails = await response.text();
+//           console.log('custom-login method failed:', errorDetails);
+//         }
+//       } catch (err) {
+//         console.log('custom-login method error:', err.message);
+//       }
+//     }
+
+//     console.log('Login API response status:', response.status);
+
+//     if (!response || !response.ok) {
+//       console.error('All login methods failed. Last error:', errorDetails);
+//       return res.status(401).json({ 
+//         error: 'Login failed!', 
+//         message: 'Invalid credentials or API configuration issue',
+//         details: errorDetails || 'No response from login API'
+//       });
+//     }
+
+//     const data = await response.json();
+//     console.log('Login API success response:', JSON.stringify(data, null, 2));
+    
+//     // Return the response from the external API
+//     res.json(data);
+//   } catch (error) {
+//     console.error('Login server error:', error);
+//     res.status(500).json({ 
+//       error: 'Server Error!', 
+//       message: 'An error occurred during login',
+//       details: error.toString() 
+//     });
+//   }
+// });
+
+  app.post('/api/login', async (req, res) => {
+    try {
+      console.log('Received login request:', JSON.stringify(req.body, null, 2));
+
+      const { username, password } = req.body;
+
+      if (!username || !password) {
+        return res.status(400).json({ 
+          success: false,
+          error: 'Username and password are required' 
+        });
+      }
+
+      // Use the working Drupal user login method
+      try {
+        const response = await fetch('https://zodr.zodml.org/user/login?_format=json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ 
+            name: username, 
+            pass: password 
+          })
+        });
+        
+        if (response.ok) {
+          console.log('Login successful with Drupal user login method');
+          const data = await response.json();
+          console.log('Drupal login success response:', JSON.stringify(data, null, 2));
+          
+          // Extract user info from the response
+          const userInfo = {
+            uid: data.current_user?.uid,
+            name: data.current_user?.name,
+            roles: data.current_user?.roles || [],
+            csrf_token: data.csrf_token,
+            logout_token: data.logout_token
+          };
+          
+          return res.json({
+            success: true,
+            message: 'Login successful',
+            user: userInfo,
+            data: data
+          });
+        } else {
+          const errorDetails = await response.text();
+          console.log('Drupal login method failed:', errorDetails);
+          return res.status(401).json({ 
+            success: false,
+            error: 'Login failed!', 
+            message: 'Invalid credentials',
+            details: errorDetails
+          });
+        }
+      } catch (err) {
+        console.log('Drupal login method error:', err.message);
+        return res.status(500).json({ 
+          success: false,
+          error: 'Server Error!', 
+          message: 'An error occurred during login',
+          details: err.message
+        });
+      }
+
+    } catch (error) {
+      console.error('Login server error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Server Error!', 
+        message: 'An error occurred during login',
+        details: error.toString() 
+      });
+    }
+  });
 
 // Endpoint for fetching all hotels
 app.get('/api/hotels', async (req, res) => {
@@ -164,6 +357,143 @@ app.get('/api/hotel-rooms', async (req, res) => {
   } catch (error) {
     console.error('Hotel rooms API error:', error);
     res.status(500).json({error:'Failed to fetch hotel rooms!', details: error.toString()});
+  }
+});
+
+// Test endpoint to check each login method individually
+app.get('/api/test-login', async (req, res) => {
+  try {
+    console.log('Testing all login methods...');
+    const testUsername = 'testman';
+    const testPassword = 'Tigers3me.$';
+    
+    const results = {};
+    
+    // Test 1: OAuth Token Endpoint
+    try {
+      const formData = new URLSearchParams();
+      formData.append('grant_type', 'password');
+      formData.append('username', testUsername);
+      formData.append('password', testPassword);
+      formData.append('client_id', 'testman');
+      formData.append('client_secret', 'Tigers3me.$');
+
+      const oauthResponse = await fetch('https://zodr.zodml.org/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: formData.toString()
+      });
+      
+      results.oauth = {
+        status: oauthResponse.status,
+        ok: oauthResponse.ok,
+        response: await oauthResponse.text()
+      };
+    } catch (err) {
+      results.oauth = { error: err.message };
+    }
+    
+    // Test 2: Drupal User Login
+    try {
+      const drupalResponse = await fetch('https://zodr.zodml.org/user/login?_format=json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          name: testUsername, 
+          pass: testPassword 
+        })
+      });
+      
+      results.drupal = {
+        status: drupalResponse.status,
+        ok: drupalResponse.ok,
+        response: await drupalResponse.text()
+      };
+    } catch (err) {
+      results.drupal = { error: err.message };
+    }
+    
+    // Test 3: Session Token Method
+    try {
+      const sessionResponse = await fetch('https://zodr.zodml.org/session/token', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      if (sessionResponse.ok) {
+        const sessionToken = await sessionResponse.text();
+        
+        const loginResponse = await fetch('https://zodr.zodml.org/user/login?_format=json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': sessionToken
+          },
+          body: JSON.stringify({ 
+            name: testUsername, 
+            pass: testPassword 
+          })
+        });
+        
+        results.session = {
+          status: loginResponse.status,
+          ok: loginResponse.ok,
+          response: await loginResponse.text()
+        };
+      } else {
+        results.session = {
+          status: sessionResponse.status,
+          error: 'Failed to get session token'
+        };
+      }
+    } catch (err) {
+      results.session = { error: err.message };
+    }
+    
+    // Test 4: Basic Auth
+    try {
+      const credentials = Buffer.from(`${testUsername}:${testPassword}`).toString('base64');
+      
+      const basicResponse = await fetch('https://zodr.zodml.org/api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Basic ${credentials}`
+        },
+        body: JSON.stringify({ 
+          username: testUsername, 
+          password: testPassword 
+        })
+      });
+      
+      results.basic = {
+        status: basicResponse.status,
+        ok: basicResponse.ok,
+        response: await basicResponse.text()
+      };
+    } catch (err) {
+      results.basic = { error: err.message };
+    }
+    
+    console.log('Test results:', JSON.stringify(results, null, 2));
+    res.json({
+      message: 'Login methods test completed',
+      results: results
+    });
+  } catch (error) {
+    console.error('Test error:', error);
+    res.status(500).json({
+      error: 'Test failed',
+      message: error.message
+    });
   }
 });
 

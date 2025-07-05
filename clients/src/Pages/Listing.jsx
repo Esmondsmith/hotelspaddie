@@ -17,19 +17,68 @@ const Listing = () => {
       setLoading(true);
       setError("");
       try {
+        console.log('Fetching hotel with ID:', hotelId);
         const hotelRes = await fetch("https://zodr.zodml.org/api/hotels");
         const hotels = await hotelRes.json();
-        const foundHotel = hotels.find(h => h.uuid === hotelId || h.nid === hotelId);
+        console.log('All hotels:', hotels);
+        
+        const foundHotel = hotels.find(h => {
+          // Convert all IDs to strings for comparison
+          const hotelUuid = String(h.uuid || '');
+          const hotelNid = String(h.nid || '');
+          const hotelId_field = String(h.id || '');
+          const searchId = String(hotelId || '');
+          
+          // Also check if searchId matches the hotel title (URL-safe version)
+          const hotelTitleId = h.title ? h.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() : '';
+          
+          const match = hotelUuid === searchId || hotelNid === searchId || hotelId_field === searchId || hotelTitleId === searchId;
+          console.log('Checking hotel:', h.title, 'UUID:', hotelUuid, 'NID:', hotelNid, 'ID:', hotelId_field, 'Title ID:', hotelTitleId, 'Search ID:', searchId, 'Match:', match);
+          return match;
+        });
+        
+        console.log('Found hotel:', foundHotel);
         setHotel(foundHotel);
 
-        if (!foundHotel || !foundHotel.nid) {
+        if (!foundHotel) {
+          console.error('Hotel not found with ID:', hotelId);
+          setError(`Hotel not found with ID: ${hotelId}`);
+          setRooms([]);
+          setLoading(false);
+          return;
+        }
+        
+        if (!foundHotel.nid) {
+          console.log('Hotel found but no NID, trying to fetch rooms by title:', foundHotel.title);
+          // Try to fetch rooms using the hotel title or other available identifier
           setRooms([]);
           setLoading(false);
           return;
         }
 
-        const roomsRes = await fetch(`https://zodr.zodml.org/api/hotel-rooms/${foundHotel.nid}`);
-        const hotelRoomsData = await roomsRes.json();
+        // Try to fetch rooms using NID first, then fallback to title
+        let roomsRes;
+        let hotelRoomsData;
+        
+        if (foundHotel.nid) {
+          console.log('Fetching rooms using NID:', foundHotel.nid);
+          roomsRes = await fetch(`https://zodr.zodml.org/api/hotel-rooms/${foundHotel.nid}`);
+        } else if (foundHotel.title) {
+          console.log('Fetching rooms using title:', foundHotel.title);
+          // Try different room endpoints
+          try {
+            roomsRes = await fetch(`https://zodr.zodml.org/api/hotel-rooms?title=${encodeURIComponent(foundHotel.title)}`);
+          } catch (err) {
+            console.log('Failed to fetch rooms by title, trying alternative endpoint');
+            roomsRes = await fetch(`https://zodr.zodml.org/api/rooms?hotel=${encodeURIComponent(foundHotel.title)}`);
+          }
+        }
+        
+        if (roomsRes) {
+          hotelRoomsData = await roomsRes.json();
+        } else {
+          hotelRoomsData = [];
+        }
 
         let roomsArray = [];
         if (Array.isArray(hotelRoomsData)) {

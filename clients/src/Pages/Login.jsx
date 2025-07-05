@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { Menu, X, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Menu, X, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import login_hotel_logo from '../Components/Assets/hotel_logo.png';
 import './CSS/Login.css'
 import Navbar from '../Components/Navbar/Navbar';
+import { login } from '../services/authService';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
 
@@ -21,11 +27,52 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) setError('');
+    if (success) setSuccess('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    // Basic validation
+    if (!formData.username.trim()) {
+      setError('Username is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.password.trim()) {
+      setError('Password is required');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      console.log('Attempting login for user:', formData.username);
+      const result = await login(formData.username, formData.password);
+      
+      if (result.success) {
+        console.log('Login successful');
+        setSuccess('Login successful! Redirecting...');
+        
+        // Small delay to show success message before redirecting
+        setTimeout(() => {
+          navigate('/'); // Redirect to home page after successful login
+        }, 1000);
+      } else {
+        setError(result.message || 'Login failed. Please try again.');
+        console.error('Login failed:', result);
+      }
+    } catch (err) {
+      setError('An error occurred during login. Please try again.');
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };  
 
   return (
@@ -45,22 +92,55 @@ const Login = () => {
 
             {/* Form Container */}
             <form onSubmit={handleSubmit} className="form-content">
-              {/* Email Field */}
+              {/* Error Message */}
+              {error && (
+                <div className="error-message" style={{
+                  backgroundColor: '#f8d7da',
+                  color: '#721c24',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  marginBottom: '15px',
+                  border: '1px solid #f5c6cb'
+                }}>
+                  {error}
+                </div>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <div className="success-message" style={{
+                  backgroundColor: '#d4edda',
+                  color: '#155724',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  marginBottom: '15px',
+                  border: '1px solid #c3e6cb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <CheckCircle size={16} />
+                  {success}
+                </div>
+              )}
+
+              {/* Username Field */}
               <div className="field-group">
-                <label htmlFor="email" className="field-label">
-                  Email Address
+                <label htmlFor="username" className="field-label">
+                  Username
                 </label>
                 <div className="input-wrapper">
                   <Mail className="input-icon" size={18} />
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username}
                     onChange={handleInputChange}
                     className="form-input"
-                    placeholder="Enter your email"
+                    placeholder="Enter your username"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -81,11 +161,13 @@ const Login = () => {
                     className="form-input password-input"
                     placeholder="Enter password"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="eye-btn"
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -108,8 +190,16 @@ const Login = () => {
               </div>
 
               {/* Submit Button */}
-              <button type="submit" className="login-submit-btn">
-                Login
+              <button 
+                type="submit" 
+                className="login-submit-btn"
+                disabled={isLoading}
+                style={{
+                  opacity: isLoading ? 0.7 : 1,
+                  cursor: isLoading ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
               </button>
 
               {/* Login Link */}
@@ -128,6 +218,3 @@ const Login = () => {
 };
 
 export default Login;
-
-
-
