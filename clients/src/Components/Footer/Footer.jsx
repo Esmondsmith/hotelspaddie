@@ -1,17 +1,28 @@
-import React from 'react'
+import React, { useContext, useState } from 'react';
 import './Footer.css'
-import logo1 from '../Assets/logo1.jpg';
-import instagram_icon from '../Assets/instagram_icon.png'
-import pintester_icon from '../Assets/pintester_icon.png'
-import whatsapp_icon from '../Assets/whatsapp_icon.png'
-import { Link as ScrollLink, animateScroll as scroll } from 'react-scroll';
+import siteLogo from '../Assets/hotel_logo.png';
+import { Link } from 'react-router-dom';
+
 
 const Footer = () => {
+
+  const [menu, setMenu] = useState("Home");
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+    const handleMenuClick = (menuItem) => {
+        setMenu(menuItem);
+        setIsMobileMenuOpen(false); // Close mobile menu when item is clicked
+    };
+
   return (
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-section">
-          <h3>Hotels Paddie</h3>
+          <div className='footer-logo'>
+              <Link to="/" onClick={() => handleMenuClick('Home')}>
+                  <img src={siteLogo} alt="Site Logo" />
+              </Link>
+          </div>
           <p>Find and book the perfect hotel for your next adventure.</p>
           <div className="social-links">
             <a href="#" aria-label="Facebook">f</a>

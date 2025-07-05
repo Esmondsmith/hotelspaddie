@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import login_hotel_logo from '../Components/Assets/hotel_logo.png';
 import './CSS/Login.css'
-// import Navbar from '../Components/Navbar/Navbar';
+import Navbar from '../Components/Navbar/Navbar';
 
 const Login = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,47 +30,8 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      {/* <Navbar /> */}
-      {/* Navigation Header */}
-      <nav className="login-nav">
-        <div className="login-nav-container">
-          <div className="nav-content">
-            <div className="logo">
-              <div className='login-logo'>
-               <a href="/"> <img src={login_hotel_logo} alt="hotel logo" height="20px" width="150px" /> </a> 
-              </div>
-            </div>
-            {/* Desktop Navigation */}
-            <div className="login-desktop-nav">
-              <a href="/" className="login-home-link">Home</a>
-              <a href="/hotels" className="nav-link">Hotel</a>
-              <a href="/about" className="nav-link">About</a>
-              <a href="/contact" className="nav-link">Contact</a>
-              <a href="/signup" className="login-btn">Sign Up</a>
-            </div>
-
-            {/* Mobile menu button */}
-            <button
-              onClick={toggleMenu}
-              className="mobile-menu-btn"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Menu */}
-        <div className={`mobile-menu ${!isMenuOpen ? 'hidden' : ''}`}>
-          <div className="mobile-menu-content">
-            <a href="/" className="nav-link">Home</a>
-            <a href="/hotels" className="nav-link">Hotel</a>
-            <a href="/about" className="nav-link">About</a>
-            <a href="/contact" className="nav-link">Contact</a>
-            <a href="/signup" className="mobile-login-btn">Sign Up</a>
-          </div>
-        </div>
-      </nav>
+      {/* Navigation Header */}      
+      <Navbar />
 
       {/* Main Content */}
       <div className="main-content">
@@ -167,3 +128,6 @@ const Login = () => {
 };
 
 export default Login;
+
+
+

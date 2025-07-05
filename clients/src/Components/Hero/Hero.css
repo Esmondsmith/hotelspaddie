@@ -172,55 +172,6 @@
     transform: translateY(-2px);
   }
 
-  /* Hosting Section */
-  .hosting-section {
-    padding: 5rem 0;
-    background: #f8fafc;
-  }
-
-  .hosting-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-  }
-
-  .hosting-text h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: #1e293b;
-  }
-
-  .hosting-text p {
-    font-size: 1.125rem;
-    color: #64748b;
-    margin-bottom: 2rem;
-  }
-
-  .hosting-btn {
-    background: #10b981;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .hosting-btn:hover {
-    background: #059669;
-    transform: translateY(-2px);
-  }
-
-  .hosting-image img {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  }
-
   /* Hotels Section */
   .hotels-section {
     padding: 5rem 0;
@@ -305,7 +256,7 @@
     color: #2563eb;
   }
 
-  /* App Section */
+  /* App Section
   .app-section {
     padding: 5rem 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -411,7 +362,7 @@
     background: #f8fafc;
     border-radius: 10px;
     margin-bottom: 10px;
-  }
+  } */
 
   /* Footer */
   .footer {

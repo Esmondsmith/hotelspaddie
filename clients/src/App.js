@@ -10,10 +10,6 @@ import SignUp from './Pages/SignUp';
 import Footer from './Components/Footer/Footer';
 import Listing from './Pages/Listing';
 
-import hotel_banner from './Components/Assets/banner_mens.png'
-import about_banner from './Components/Assets/banner_women.png'
-import contact_banner from './Components/Assets/banner_kids.png'
-
 
 
 
@@ -26,14 +22,10 @@ function App() {
 
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/hotels' element={<Hotels banner={hotel_banner} category="hotel"/>} />
-        <Route path='/about' element={<About banner={about_banner} category="about"/>} />
-        <Route path='/contact' element={<Contact banner={contact_banner} category="contact"/>} />
-        {/* <Route path='/product' element={<Product/>} /> */}
+        <Route path='/hotels' element={<Hotels category="hotel"/>} />
+        <Route path='/about' element={<About category="about"/>} />
+        <Route path='/contact' element={<Contact category="contact"/>} />
         <Route path='/listing/:hotelId' element={<Listing />} />
-        {/* <Route path=':productId' element={<Product/>} /> */}
-        <Route/>
-        {/* <Route path='/cart' element={<Cart />} /> */}
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<SignUp />} />
       </Routes>

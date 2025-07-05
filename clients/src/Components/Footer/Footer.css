@@ -79,6 +79,25 @@
     color: #94a3b8;
 }
 
+/* Logo Styles */
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.footer-logo img {
+    height: 25px;
+    width: 150px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.footer-logo img:hover {
+    opacity: 0.8;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .hamburger {
@@ -155,5 +174,9 @@
 
     .footer-container {
     grid-template-columns: 1fr;
+    }
+    .footer-logo img {
+        height: 18px;
+        width: 100px;
     }
 }
