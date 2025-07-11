@@ -9,6 +9,7 @@ import Login from './Pages/Login';
 import SignUp from './Pages/SignUp';
 import Footer from './Components/Footer/Footer';
 import Listing from './Pages/Listing';
+import UserProfilePage from './Pages/UserProfilePage';
 
 
 
@@ -28,6 +29,7 @@ function App() {
         <Route path='/listing/:hotelId' element={<Listing />} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<SignUp />} />
+        <Route path='/userprofile' element={<UserProfilePage />} />
       </Routes>
       
       {/* <Footer /> */}

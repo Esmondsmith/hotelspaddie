@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Star} from "lucide-react";
 import "./CSS/Listing.css";
 import Navbar from "../Components/Navbar/Navbar";
@@ -11,6 +11,8 @@ const Listing = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHotelAndRooms = async () => {
@@ -181,3 +183,19 @@ const Listing = () => {
 };
 
 export default Listing;
+
+
+{/* <button
+    onClick={() => {
+        const currentHotelId = hotel.uuid || hotel.nid;
+        // IMPORTANT: Replace 'DUMMY_ROOM_ID' with an actual room ID you expect from your API
+        // For a real app, this roomId would come from a room object on a listing page
+        const dummyRoomId = 'some-room-uuid-or-nid'; // Replace with a real room ID from your API response
+        navigate(`/book/${currentHotelId}/${dummyRoomId}`);
+    }}
+    className="hotels-view-rooms-btn"
+    onMouseEnter={(e) => e.target.style.backgroundColor = '#003d39'}
+    onMouseLeave={(e) => e.target.style.backgroundColor = '#00504B'}
+>
+    Book Now (for testing)
+</button> */}

@@ -1,0 +1,328 @@
+/* General container styling */
+.booking-page-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', sans-serif;
+    color: #333;
+}
+
+/* Header styling */
+.booking-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.booking-header h1 {
+    font-size: 2.2rem;
+    color: #00504B; /* Major color */
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.booking-header p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-top: 5px;
+}
+
+.booking-header .highlight {
+    font-weight: 600;
+    color: #00504B;
+}
+
+.booking-header hr {
+    width: 80px;
+    border: none;
+    border-top: 3px solid #00504B; /* Major color */
+    margin: 15px auto 0;
+    border-radius: 2px;
+}
+
+/* Room Summary Section */
+.room-summary {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.room-summary h2 {
+    font-size: 1.5rem;
+    color: #00504B;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.room-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #444;
+    background-color: #eef8f7; /* Lighter shade of major color */
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #d0e0df;
+}
+
+.info-item svg {
+    color: #00504B; /* Major color for icons */
+}
+
+/* Form Styling */
+.booking-form .form-group {
+    margin-bottom: 20px;
+}
+
+.booking-form label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+.booking-form input[type="date"],
+.booking-form input[type="number"],
+.booking-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Include padding in width */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.booking-form input[type="date"]:focus,
+.booking-form input[type="number"]:focus,
+.booking-form textarea:focus {
+    border-color: #00504B; /* Major color on focus */
+    box-shadow: 0 0 0 3px rgba(0, 80, 75, 0.2); /* Major color with transparency */
+    outline: none;
+}
+
+.booking-form textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 80px;
+}
+
+/* Total Price Section */
+.total-price-section {
+    text-align: right;
+    margin-top: 30px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.total-price-section .price-display {
+    color: #00504B; /* Major color for price */
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+/* Submit Button */
+.submit-button {
+    width: 100%;
+    padding: 15px 25px;
+    background-color: #00504B; /* Major color */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(0, 80, 75, 0.3); /* Shadow with major color */
+}
+
+.submit-button:hover {
+    background-color: #003d39; /* Darker shade on hover */
+    transform: translateY(-2px);
+}
+
+.submit-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Loading and Error States */
+.loading-state, .error-state, .success-state {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.loading-state p {
+    color: #00504B;
+    font-weight: 500;
+}
+
+.error-message {
+    color: #dc3545; /* Red for errors */
+    font-weight: 600;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.success-state h2 {
+    color: #28a745; /* Green for success */
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.success-state p {
+    margin-bottom: 10px;
+}
+
+.success-state .highlight {
+    color: #00504B; /* Major color for highlights in success */
+    font-weight: 600;
+}
+
+.success-state button {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-bookings-button {
+    background-color: #00504B;
+    color: white;
+}
+
+.view-bookings-button:hover {
+    background-color: #003d39;
+}
+
+.home-button {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.home-button:hover {
+    background-color: #e0e0e0;
+}
+
+.back-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .booking-page-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .booking-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .booking-header p {
+        font-size: 0.95rem;
+    }
+
+    .room-summary h2 {
+        font-size: 1.3rem;
+    }
+
+    .info-item {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+
+    .booking-form label {
+        font-size: 0.95rem;
+    }
+
+    .booking-form input,
+    .booking-form textarea {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+
+    .total-price-section {
+        font-size: 1.1rem;
+    }
+
+    .total-price-section .price-display {
+        font-size: 1.4rem;
+    }
+
+    .submit-button {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .booking-page-container {
+        margin: 15px;
+        padding: 15px;
+    }
+
+    .booking-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .booking-header p {
+        font-size: 0.85rem;
+    }
+
+    .room-info-grid {
+        grid-template-columns: 1fr; /* Stack items on very small screens */
+    }
+
+    .info-item {
+        font-size: 0.85rem;
+    }
+
+    .booking-form label {
+        font-size: 0.9rem;
+    }
+
+    .booking-form input,
+    .booking-form textarea {
+        font-size: 0.9rem;
+    }
+}

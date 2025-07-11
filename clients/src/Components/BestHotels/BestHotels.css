@@ -129,7 +129,8 @@
 }
 
 .hotel-info {
-  padding: 24px;
+  padding: 50px 24px;
+  position: relative;
 }
 
 .hotel-title {
@@ -179,21 +180,21 @@
   gap: 4px;
   background-color: #f0f0f0;
   color: #555;
-  padding: 4px 8px;
-  border-radius: 12px;
+  /* padding: 4px 8px; */
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 500;
 }
 
 .amenity-more {
-  color: #00504B;
-  font-size: 12px;
+  color: #00504B !important;
   font-weight: 500;
   cursor: pointer;
+  border: 1px solid #00504B;
 }
 
 .view-details-btn {
-  width: 100%;
+  width: 80%;
   background-color: #00504B;
   color: white;
   border: none;
@@ -203,6 +204,9 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
+  /* new lines */
+  position: absolute;
+  top: 300px;
 }
 
 .view-details-btn:hover {
@@ -219,13 +223,19 @@
     font-size: 2rem;
   }
 
+  .hotel-info {
+    padding: 32px 16px;
+  }
+ .view-details-btn {
+    position: static; 
+    width: 100%;
+    margin-top: 16px;
+    display: block; 
+  }
+
   .hotels-grid {
     grid-template-columns: 1fr;
     gap: 20px;
-  }
-
-  .hotel-info {
-    padding: 20px;
   }
 
   .hotel-title {
@@ -243,7 +253,13 @@
   }
 
   .hotel-info {
-    padding: 16px;
+    padding: 32px 16px;
+  }
+  .view-details-btn {
+    position: static; 
+    width: 100%;
+    margin-top: 16px;
+    display: block; 
   }
 
   .amenities-list {

@@ -6,6 +6,7 @@ import './CSS/Login.css'
 import Navbar from '../Components/Navbar/Navbar';
 import { login } from '../services/authService';
 
+
 const Login = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -59,9 +60,9 @@ const Login = () => {
         console.log('Login successful');
         setSuccess('Login successful! Redirecting...');
         
-        // Small delay to show success message before redirecting
+        // Delay to show success message before redirecting
         setTimeout(() => {
-          navigate('/'); // Redirect to home page after successful login
+          navigate('/userprofile'); // Redirect to home page after successful login
         }, 1000);
       } else {
         setError(result.message || 'Login failed. Please try again.');
