@@ -1,0 +1,273 @@
+.best-hotels {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8f9fa;
+}
+
+.best-hotels-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.best-hotels-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.best-hotels-header hr {
+  width: 80px;
+  height: 3px;
+  background-color: #00504B;
+  border: none;
+  margin: 0 auto;
+}
+
+/* Loading and Error States */
+.loading-container,
+.error-container,
+.no-hotels {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #00504B;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.retry-btn {
+  background-color: #00504B;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 16px;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background-color: #0d9488;
+}
+
+/* Hotels Grid */
+.hotels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+/* Hotel Card */
+.hotel-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hotel-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hotel-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.hotel-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.hotel-card:hover .hotel-image img {
+  transform: scale(1.05);
+}
+
+.hotel-rating {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rating-number {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.hotel-info {
+  padding: 50px 24px;
+  position: relative;
+}
+
+.hotel-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.hotel-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.hotel-description {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.hotel-amenities {
+  margin-bottom: 20px;
+}
+
+.hotel-amenities h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.amenities-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f0f0f0;
+  color: #555;
+  /* padding: 4px 8px; */
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.amenity-more {
+  color: #00504B !important;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #00504B;
+}
+
+.view-details-btn {
+  width: 80%;
+  background-color: #00504B;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  /* new lines */
+  position: absolute;
+  top: 300px;
+}
+
+.view-details-btn:hover {
+  background-color: #0d9488;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .best-hotels {
+    padding: 40px 16px;
+  }
+
+  .best-hotels-header h1 {
+    font-size: 2rem;
+  }
+
+  .hotel-info {
+    padding: 32px 16px;
+  }
+ .view-details-btn {
+    position: static; 
+    width: 100%;
+    margin-top: 16px;
+    display: block; 
+  }
+
+  .hotels-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .hotel-title {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .best-hotels-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .hotel-image {
+    height: 180px;
+  }
+
+  .hotel-info {
+    padding: 32px 16px;
+  }
+  .view-details-btn {
+    position: static; 
+    width: 100%;
+    margin-top: 16px;
+    display: block; 
+  }
+
+  .amenities-list {
+    gap: 6px;
+  }
+
+  .amenity-item {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+} 

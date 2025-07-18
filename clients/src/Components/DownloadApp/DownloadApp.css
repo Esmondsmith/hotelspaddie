@@ -1,0 +1,174 @@
+/* App Section */
+  .app-section {
+    padding: 5rem 0;
+    color: white;
+    background-color: #F7F7F7;
+  }
+  .offers {
+    padding: 5rem 0;
+    color: white;
+    background-color: #caefec;
+  }
+
+  .app-content {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    align-items: center;
+  }
+ 
+  .offer-content{
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    align-items: center;
+  }
+  .app-text h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+
+  .app-text p {
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    color: #1f2937;
+  }
+
+  .app-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .app-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #00504B;
+    border: 1px solid #00504B;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .app-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #00504B;
+    transform: translateY(-2px);
+  }
+
+  .app-btn div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-btn span {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+
+  .app-btn strong {
+    font-size: 1rem;
+  }
+
+  .phone-mockup {
+    width: 250px;
+    height: 500px;
+    background: #1f2937;
+    border-radius: 30px;
+    padding: 20px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .app-preview {
+    padding: 20px;
+    height: 100%;
+  }
+
+  .app-header {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin-bottom: 20px;
+  }
+
+  .app-search {
+    background: #f3f4f6;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    color: #64748b;
+  }
+
+  .app-hotel {
+    height: 80px;
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  .download-app-img img{
+    height: 700px;
+    width: 600px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .app-content {
+      display: block;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-buttons {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .app-btn {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .app-btn strong {
+      align-items: center;
+      font-size: 18px;
+    }
+
+    .phone-mockup {
+      width: 200px;
+      height: 400px;
+    }
+
+    .app-text h2 {
+      font-size: 2rem;
+    }
+    .download-app-img img {
+      max-width: 100%;
+      height: auto;
+      margin-left: -30px;
+      background-color: #F7F7F7;
+    }
+  }
+
+  @media (max-width: 768px) {
+  
+}
+
+
+
+

@@ -1,0 +1,130 @@
+.banner {
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dark overlay for better text visibility */
+.banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Black overlay with 50% opacity */
+  z-index: 1;
+}
+
+/* Ensure content appears above the overlay */
+.banner > section {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-content h1 {
+  font-size: 4.5rem;
+  font-weight: 700;
+  color: #ffffff; 
+}
+
+.hero-content h2 {
+  font-size: 4.0rem;
+  margin-top: -50px;
+  font-weight: 700;
+  color: #ffffff; 
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  margin-bottom: 3rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+.search-form-wrapper{
+  padding: 10px;
+  background: rgba(242, 239, 239, 0.5); /* Black overlay with 50% opacity */
+  z-index: 1;
+  border-radius: 8px;
+    P{
+      font-size: 25px;
+      font-weight: 700;
+      margin-bottom: 1px;
+      color: #00504B;
+    }
+}
+.banner-search-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 50px;
+  display: flex;
+  gap: 1rem;
+  max-width: 1500px;
+  margin: 0 auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 200px;
+  color: #333;
+}
+
+.banner-search-btn {
+  background: #00504B;
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.banner-search-btn:hover {
+  background: #045651;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .banner-search-form {
+    flex-direction: column;
+    max-width: 2000px;
+  }
+
+  .search-field {
+    min-width: 100%;
+  }
+  .hero-content h1 {
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: #ffffff; 
+    margin-left: 10px;
+  }
+
+  .hero-content h2 {
+    font-size: 2.5rem;
+    margin-top: -20px;
+    font-weight: 700;
+    color: #ffffff; 
+    margin-left: 10px;
+  }
+  .hero-content p {
+    display: none;
+  }
+}
