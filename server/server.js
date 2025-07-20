@@ -581,7 +581,7 @@ app.get('/api/hotel-rooms', async (req, res) => {
       return res.status(400).json({ error: 'Missing nid parameter' });
     }
 
-    const url = `https://zodr.zodml.org/api/hotel-rooms/?nid=${encodeURIComponent(nid)}`;
+    const url = `https://zodr.zodml.org/api/hotel-rooms/${nid}`;
     console.log('Fetching hotel rooms from:', url);
 
     const response = await fetch(url, {
