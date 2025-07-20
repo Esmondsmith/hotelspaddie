@@ -154,7 +154,6 @@ const Login = () => {
                   {error}
                 </div>
               )}
-
               {/* Success Message */}
               {success && (
                 <div className="success-message" style={{

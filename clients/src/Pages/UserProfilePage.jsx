@@ -64,7 +64,6 @@ const UserProfilePage = () => {
           });
           return;
         }
-
         console.log('Final profile data:', profile);
         setUserProfile(profile);
         
