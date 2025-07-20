@@ -63,11 +63,11 @@ const Hotels = () => {
     setSearchLoading(true);
     
     try {
-      let url = "https://zodr.zodml.org/api/hotels";
+      let url = "http://localhost:3001/api/hotels";
       
       // If search parameters are provided, use search endpoint
       if (searchParams) {
-        url = "https://zodr.zodml.org/api/search/hotels";
+        url = "http://localhost:3001/api/search/hotels";
         const params = new URLSearchParams();
         
         if (searchParams.state) params.append('field_state_target_id', searchParams.state);

@@ -19,7 +19,7 @@ const Listing = () => {
       setError("");
       try {
         console.log('Fetching hotel with ID:', hotelId);
-        const hotelRes = await fetch("https://zodr.zodml.org/api/hotels");
+        const hotelRes = await fetch("http://localhost:3001/api/hotels");
         const hotels = await hotelRes.json();
         console.log('All hotels:', hotels);
         
@@ -63,15 +63,15 @@ const Listing = () => {
         
         if (foundHotel.nid) {
           console.log('Fetching rooms using NID:', foundHotel.nid);
-          roomsRes = await fetch(`https://zodr.zodml.org/api/hotel-rooms/${foundHotel.nid}`);
+          roomsRes = await fetch(`http://localhost:3001/api/hotel-rooms?nid=${foundHotel.nid}`);
         } else if (foundHotel.title) {
           console.log('Fetching rooms using title:', foundHotel.title);
           // Try different room endpoints
           try {
-            roomsRes = await fetch(`https://zodr.zodml.org/api/hotel-rooms?title=${encodeURIComponent(foundHotel.title)}`);
+            roomsRes = await fetch(`http://localhost:3001/api/hotel-rooms?title=${encodeURIComponent(foundHotel.title)}`);
           } catch (err) {
             console.log('Failed to fetch rooms by title, trying alternative endpoint');
-            roomsRes = await fetch(`https://zodr.zodml.org/api/rooms?hotel=${encodeURIComponent(foundHotel.title)}`);
+            roomsRes = await fetch(`http://localhost:3001/api/rooms?hotel=${encodeURIComponent(foundHotel.title)}`);
           }
         }
         

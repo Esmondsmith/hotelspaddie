@@ -73,7 +73,7 @@ const BookingPage = () => {
     if (!hotel?.nid) return;
     setLoadingOtherRooms(true);
     try {
-      const roomsRes = await fetch(`https://zodr.zodml.org/api/hotel-rooms/${hotel.nid}`);
+      const roomsRes = await fetch(`http://localhost:3001/api/hotel-rooms?nid=${hotel.nid}`);
       const hotelRoomsData = await roomsRes.json();
       
       let roomsArray = [];
