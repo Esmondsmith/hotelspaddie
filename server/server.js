@@ -754,96 +754,6 @@ app.post('/api/bookings', async (req, res) => {
   }
 });
 
-// 2. Get user's bookings
-// app.get('/api/bookings', async (req, res) => {
-//   try {
-//     console.log('Fetching user bookings...');
-
-//     // Extract access token from Authorization header
-//     const authHeader = req.headers.authorization;
-//     let access_token = null;
-    
-//     if (authHeader && authHeader.startsWith('Bearer ')) {
-//       access_token = authHeader.substring(7); // Remove 'Bearer ' prefix
-//     } else if (req.query.access_token) {
-//       access_token = req.query.access_token;
-//     }
-    
-//     console.log('Extracted access token:', access_token ? 'Present' : 'Missing');
-    
-//     if (!access_token) {
-//       return res.status(401).json({ 
-//         success: false,
-//         error: 'Authentication required',
-//         message: 'Access token is required'
-//       });
-//     }
-
-//     // Decode session token to get user info
-//     let userInfo;
-//     try {
-//       const decodedToken = JSON.parse(atob(access_token));
-//       userInfo = decodedToken;
-//       console.log('Decoded session token for bookings:', userInfo);
-//     } catch (error) {
-//       console.error('Invalid session token:', error);
-//       return res.status(401).json({
-//         success: false,
-//         error: 'Invalid session token',
-//         message: 'Please login again'
-//       });
-//     }
-
-//     // Mock bookings for the user
-//     const mockBookings = [
-//       {
-//         id: `booking-${Date.now()}-1`,
-//         type: "node--booking",
-//         attributes: {
-//           title: "Booking for Room 101 at Sample Hotel",
-//           field_check_in_date: "2025-01-15",
-//           field_check_out_date: "2025-01-18",
-//           field_number_of_guest: 2,
-//           field_total_price: "450.00",
-//           field_booking_status: "confirmed",
-//           field_payment_status: "paid",
-//           field_special_requests: "High floor preferred"
-//         }
-//       },
-//       {
-//         id: `booking-${Date.now()}-2`,
-//         type: "node--booking",
-//         attributes: {
-//           title: "Booking for Suite 205 at Luxury Hotel",
-//           field_check_in_date: "2025-02-20",
-//           field_check_out_date: "2025-02-25",
-//           field_number_of_guest: 3,
-//           field_total_price: "1200.00",
-//           field_booking_status: "pending",
-//           field_payment_status: "unpaid",
-//           field_special_requests: "Late check-in"
-//         }
-//       }
-//     ];
-
-//     console.log('Returning mock bookings for user:', userInfo.name);
-
-//     res.json({
-//       success: true,
-//       message: 'Bookings retrieved successfully',
-//       bookings: mockBookings
-//     });
-
-//   } catch (error) {
-//     console.error('Fetch bookings error:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Server error',
-//       message: 'An error occurred while fetching bookings',
-//       details: error.toString()
-//     });
-//   }
-// });
 app.get('/api/bookings', async (req, res) => {
   try {
     console.log('Fetching user bookings...');
@@ -1000,7 +910,6 @@ app.get('/api/bookings/:bookingId', async (req, res) => {
     } else {
       // Use session token - return mock booking data
       console.log('Returning mock booking data for user:', userInfo.name);
-      
       const mockBooking = {
         id: bookingId,
         type: "node--booking",
