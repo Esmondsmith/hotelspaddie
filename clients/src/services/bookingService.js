@@ -33,20 +33,20 @@ export const bookingService = {
     }
   },
 
-  // Get user's bookings
+  // Get user's past bookings
   async getUserBookings() {
     try {
-      console.log('Fetching user bookings...');
+      console.log('Fetching user past bookings...');
       
-      const response = await fetch(`${API_BASE_URL}/bookings`, {
+      const response = await fetch(`${API_BASE_URL}/user-past-bookings`, {
         method: 'GET',
         headers: getAuthHeaders()
       });
 
-      console.log('Get bookings response status:', response.status);
+      console.log('Get user past bookings response status:', response.status);
       
       const data = await response.json();
-      console.log('Get bookings response:', data);
+      console.log('Get user past bookings response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch bookings');
@@ -54,7 +54,7 @@ export const bookingService = {
 
       return data;
     } catch (error) {
-      console.error('Get bookings error:', error);
+      console.error('Get user past bookings error:', error);
       throw error;
     }
   },

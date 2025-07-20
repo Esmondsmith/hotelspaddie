@@ -164,9 +164,25 @@ const BookingHistory = () => {
                   <div className="info-row">
                     <Users size={16} />
                     <span>
-                      <strong>Guests:</strong> {booking.attributes?.field_number_of_guest || 1}
+                      <strong>Guests:</strong> {booking.attributes?.field_number_of_guests || 1}
                     </span>
                   </div>
+                  {booking.attributes?.hotel_name && (
+                    <div className="info-row">
+                      <MapPin size={16} />
+                      <span>
+                        <strong>Hotel:</strong> {booking.attributes.hotel_name}
+                      </span>
+                    </div>
+                  )}
+                  {booking.attributes?.room_name && (
+                    <div className="info-row">
+                      <MapPin size={16} />
+                      <span>
+                        <strong>Room:</strong> {booking.attributes.room_name}
+                      </span>
+                    </div>
+                  )}
                   <div className="info-row">
                     <MapPin size={16} />
                     <span>
@@ -175,10 +191,10 @@ const BookingHistory = () => {
                   </div>
                 </div>
 
-                {booking.attributes?.field_special_requests && (
+                {booking.attributes?.field_special_requests_notes && (
                   <div className="special-requests">
                     <strong>Special Requests:</strong>
-                    <p>{booking.attributes.field_special_requests}</p>
+                    <p>{booking.attributes.field_special_requests_notes}</p>
                   </div>
                 )}
 
@@ -190,6 +206,15 @@ const BookingHistory = () => {
                     {booking.attributes?.field_payment_status || 'Unknown'}
                   </span>
                 </div>
+
+                {booking.attributes?.created && (
+                  <div className="booking-date">
+                    <Clock size={16} />
+                    <span>
+                      <strong>Booked on:</strong> {formatDate(booking.attributes.created)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="booking-actions">

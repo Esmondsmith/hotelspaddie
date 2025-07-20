@@ -1290,6 +1290,209 @@ app.get('/api/test-login', async (req, res) => {
 });
 
 
+// User Past Bookings Endpoint
+app.get('/api/user-past-bookings', async (req, res) => {
+  try {
+    console.log('Fetching user past bookings...');
+    
+    // Extract access token from Authorization header
+    const authHeader = req.headers.authorization;
+    let access_token = null;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      access_token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    }
+    
+    console.log('Extracted access token:', access_token ? 'Present' : 'Missing');
+    
+    if (!access_token) {
+      return res.status(401).json({ 
+        success: false,
+        error: 'Authentication required',
+        message: 'Access token is required'
+      });
+    }
+
+    // Check if this is a real OAuth token or a session token
+    let isOAuthToken = false;
+    let userInfo = null;
+
+    try {
+      // Try to decode as session token first
+      const decodedToken = JSON.parse(atob(access_token));
+      userInfo = decodedToken;
+      console.log('Using session token for user past bookings');
+    } catch (error) {
+      // If decoding fails, assume it's an OAuth token
+      isOAuthToken = true;
+      console.log('Using OAuth token for user past bookings');
+    }
+
+    if (isOAuthToken) {
+      // Use real OAuth token for external API
+      console.log('Using OAuth token for user past bookings');
+      
+      // First, get the current user info to get their UUID
+      const userResponse = await fetch('https://zodr.zodml.org/jsonapi/user/user/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Accept': 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json'
+        }
+      });
+
+      console.log('User info API response status:', userResponse.status);
+
+      if (!userResponse.ok) {
+        const text = await userResponse.text();
+        console.error('User info API Error!', text);
+        return res.status(userResponse.status).json({
+          success: false,
+          error: 'Failed to fetch user info',
+          message: 'Could not retrieve user information',
+          details: text
+        });
+      }
+
+      const userData = await userResponse.json();
+      console.log('User info API success response:', JSON.stringify(userData, null, 2));
+
+      const userUuid = userData.data?.id;
+      if (!userUuid) {
+        return res.status(400).json({
+          success: false,
+          error: 'User UUID not found',
+          message: 'Could not retrieve user UUID'
+        });
+      }
+
+      console.log('User UUID:', userUuid);
+
+      // Now get the user's bookings using their UUID
+      const bookingsResponse = await fetch(`https://zodr.zodml.org/jsonapi/node/booking?filter[uid.id]=${userUuid}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Accept': 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json'
+        }
+      });
+
+      console.log('User bookings API response status:', bookingsResponse.status);
+
+      if (!bookingsResponse.ok) {
+        const text = await bookingsResponse.text();
+        console.error('User bookings API Error!', text);
+        return res.status(bookingsResponse.status).json({
+          success: false,
+          error: 'Failed to fetch user bookings',
+          message: 'Could not retrieve booking history',
+          details: text
+        });
+      }
+
+      const bookingsData = await bookingsResponse.json();
+      console.log('User bookings API success response:', JSON.stringify(bookingsData, null, 2));
+
+      // Enhance bookings with hotel and room details if available
+      const enhancedBookings = await Promise.all(
+        (bookingsData.data || []).map(async (booking) => {
+          try {
+            // Get hotel details if available
+            if (booking.relationships?.field_hotel?.data?.id) {
+              const hotelResponse = await fetch(`https://zodr.zodml.org/jsonapi/node/hotel/${booking.relationships.field_hotel.data.id}`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${access_token}`,
+                  'Accept': 'application/vnd.api+json',
+                  'Content-Type': 'application/vnd.api+json'
+                }
+              });
+              
+              if (hotelResponse.ok) {
+                const hotelData = await hotelResponse.json();
+                booking.attributes.hotel_name = hotelData.data?.attributes?.title;
+              }
+            }
+
+            // Get room details if available
+            if (booking.relationships?.field_room?.data?.id) {
+              const roomResponse = await fetch(`https://zodr.zodml.org/jsonapi/node/room_type/${booking.relationships.field_room.data.id}`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${access_token}`,
+                  'Accept': 'application/vnd.api+json',
+                  'Content-Type': 'application/vnd.api+json'
+                }
+              });
+              
+              if (roomResponse.ok) {
+                const roomData = await roomResponse.json();
+                booking.attributes.room_name = roomData.data?.attributes?.title;
+              }
+            }
+
+            return booking;
+          } catch (error) {
+            console.error('Error enhancing booking with hotel/room details:', error);
+            return booking;
+          }
+        })
+      );
+
+      res.json({
+        success: true,
+        message: 'User past bookings retrieved successfully',
+        bookings: enhancedBookings
+      });
+    } else {
+      // Use session token - try to get real data from external API
+      console.log('Using session token for user past bookings - attempting external API call');
+      
+      // Try to call external API even with session token
+      const response = await fetch('https://zodr.zodml.org/jsonapi/node/booking', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json'
+        }
+      });
+
+      console.log('External API response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('External API success response:', JSON.stringify(data, null, 2));
+        
+        res.json({
+          success: true,
+          message: 'User past bookings retrieved successfully',
+          bookings: data.data || []
+        });
+      } else {
+        // If external API fails, return empty array instead of mock data
+        console.log('External API failed, returning empty bookings array');
+        
+        res.json({
+          success: true,
+          message: 'No bookings found',
+          bookings: []
+        });
+      }
+    }
+
+  } catch (error) {
+    console.error('User past bookings error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: 'An error occurred while fetching user past bookings',
+      details: error.toString()
+    });
+  }
+});
+
 // User Info Endpoint
 app.get('/api/user-info', async (req, res) => {
   try {
