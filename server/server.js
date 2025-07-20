@@ -1290,6 +1290,126 @@ app.get('/api/test-login', async (req, res) => {
 });
 
 
+// User Info Endpoint
+app.get('/api/user-info', async (req, res) => {
+  try {
+    console.log('Fetching user info...');
+    
+    // Extract access token from Authorization header
+    const authHeader = req.headers.authorization;
+    let access_token = null;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      access_token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    }
+    
+    console.log('Extracted access token:', access_token ? 'Present' : 'Missing');
+    
+    if (!access_token) {
+      return res.status(401).json({ 
+        success: false,
+        error: 'Authentication required',
+        message: 'Access token is required'
+      });
+    }
+
+    // Check if this is a real OAuth token or a session token
+    let isOAuthToken = false;
+    let userInfo = null;
+
+    try {
+      // Try to decode as session token first
+      const decodedToken = JSON.parse(atob(access_token));
+      userInfo = decodedToken;
+      console.log('Using session token for user info');
+    } catch (error) {
+      // If decoding fails, assume it's an OAuth token
+      isOAuthToken = true;
+      console.log('Using OAuth token for user info');
+    }
+
+    if (isOAuthToken) {
+      // Use real OAuth token for external API
+      const response = await fetch('https://zodr.zodml.org/jsonapi/user/user', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Accept': 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json'
+        }
+      });
+
+      console.log('User info API response status:', response.status);
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('User info API Error!', text);
+        return res.status(response.status).json({
+          success: false,
+          error: 'Failed to fetch user info',
+          message: 'Could not retrieve user information',
+          details: text
+        });
+      }
+
+      const data = await response.json();
+      console.log('User info API success response:', JSON.stringify(data, null, 2));
+
+      // Extract user data from the response
+      const userData = data.data;
+      if (!userData) {
+        return res.status(404).json({
+          success: false,
+          error: 'User not found',
+          message: 'No user data available'
+        });
+      }
+
+      const userProfile = {
+        uid: userData.id,
+        name: userData.attributes?.name || userData.attributes?.display_name,
+        mail: userData.attributes?.mail,
+        firstName: userData.attributes?.field_first_name || '',
+        lastName: userData.attributes?.field_last_name || '',
+        phone: userData.attributes?.field_phone || '',
+        roles: userData.attributes?.roles || [],
+        created: userData.attributes?.created,
+        updated: userData.attributes?.changed,
+        status: userData.attributes?.status
+      };
+
+      res.json({
+        success: true,
+        message: 'User info retrieved successfully',
+        user: userProfile
+      });
+    } else {
+      // Use session token - return user info from session
+      console.log('Returning user info from session token');
+      
+      res.json({
+        success: true,
+        message: 'User info retrieved successfully',
+        user: {
+          uid: userInfo.uid,
+          name: userInfo.name,
+          roles: userInfo.roles || [],
+          timestamp: userInfo.timestamp
+        }
+      });
+    }
+
+  } catch (error) {
+    console.error('User info error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: 'An error occurred while fetching user info',
+      details: error.toString()
+    });
+  }
+});
+
 // Start server
 const port = 3001; // Ensure this matches the port in your frontend fetch calls
 app.listen(port, () => console.log(`Server is listening on http://localhost:${port}`));

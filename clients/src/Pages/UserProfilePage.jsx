@@ -41,20 +41,24 @@ const UserProfilePage = () => {
         console.log('Profile from localStorage:', profile);
         console.log('Basic user from localStorage:', basicUser);
         
-        if (!profile && basicUser) {
-          try {
-            const user = JSON.parse(basicUser);
-            profile = user;
-            
-            // If we have a user ID, try to fetch complete profile
-            if (user.uid) {
-              const fullProfile = await fetchUserProfile(user.uid);
-              if (fullProfile) {
-                profile = fullProfile;
-              }
+        // Always try to fetch fresh user info from the API
+        try {
+          const freshProfile = await fetchUserProfile();
+          if (freshProfile) {
+            profile = freshProfile;
+            console.log('Fresh profile fetched from API:', profile);
+          }
+        } catch (apiError) {
+          console.error('Error fetching fresh profile:', apiError);
+          
+          // Fallback to localStorage data
+          if (!profile && basicUser) {
+            try {
+              const user = JSON.parse(basicUser);
+              profile = user;
+            } catch (parseError) {
+              console.error('Error parsing user data:', parseError);
             }
-          } catch (parseError) {
-            console.error('Error parsing user data:', parseError);
           }
         }
 

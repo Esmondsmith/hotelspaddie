@@ -249,16 +249,17 @@ export async function login(username, password) {
   }
 }
 
-// New function to fetch complete user profile
+// New function to fetch complete user profile using /api/user-info endpoint
 export async function fetchUserProfile(userId) {
   try {
     const token = getAccessToken();
-    if (!token || !userId) {
-      console.log('No token or user ID available for profile fetch');
+    if (!token) {
+      console.log('No token available for profile fetch');
       return null;
     }
-  // Use the backend API instead of direct Drupal call
-    const response = await fetch(`http://localhost:3001/api/user/profile/${userId}`, {
+
+    // Use the new /api/user-info endpoint
+    const response = await fetch('http://localhost:3001/api/user-info', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
