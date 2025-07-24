@@ -3,13 +3,70 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch'); // Make sure you've installed node-fetch: npm install node-fetch
 const app = express();
+const bcrypt = require('bcrypt');
+
 
 app.use(cors());
 app.use(express.json());
 
+
+
+//Working register api
 app.post('/api/Register', async (req, res) => {
   try {
     console.log('Received registration request:', JSON.stringify(req.body, null, 2));
+    
+    // Validate required fields
+    const requiredFields = ['name', 'mail', 'pass', 'field_first_name', 'field_last_name', 'field_phone_number', 'field_gender', 'field_nationality'];
+    for (const field of requiredFields) {
+      if (!req.body[field] || !req.body[field][0] || !req.body[field][0].value) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: `Missing required field: ${field}`
+        });
+      }
+    }
+
+    // Additional validation for specific fields
+    const email = req.body.mail[0].value;
+    const phoneNumber = req.body.field_phone_number[0].value;
+    const gender = req.body.field_gender[0].value;
+    const nationality = req.body.field_nationality[0].value;
+
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'Invalid email format'
+      });
+    }
+
+    // Phone number validation (basic)
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    if (!phoneRegex.test(phoneNumber.replace(/[\s\-\(\)]/g, ''))) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'Invalid phone number format'
+      });
+    }
+
+    // Gender validation
+    if (!['male', 'female'].includes(gender.toLowerCase())) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'Invalid gender value'
+      });
+    }
+
+    // Nationality validation
+    if (!nationality.trim()) { // Basic check if it's not empty
+    return res.status(400).json({
+        error: 'Validation failed',
+        details: 'Country field cannot be empty'
+    });
+}
 
     // API to register users
     const response = await fetch('https://zodr.zodml.org/entity/user?_format=json', {
@@ -21,28 +78,128 @@ app.post('/api/Register', async (req, res) => {
       },
       body: JSON.stringify(req.body)
     });
-
+    
     console.log('External API response status:', response.status);
     console.log('External API response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const text = await response.text();
       console.error('Zodr API Error!', text);
-      return res.status(response.status).json({error:'Registration failed!', details: text});
+      
+      // Try to parse the error response for better error messages
+      let errorDetails = text;
+      try {
+        const errorData = JSON.parse(text);
+        if (errorData.message) {
+          errorDetails = errorData.message;
+        } else if (errorData.error) {
+          errorDetails = errorData.error;
+        }
+      } catch (parseError) {
+        // Keep original text if parsing fails
+        console.warn('Could not parse Zodr API error response as JSON:', parseError);
+      }
+      
+      return res.status(response.status).json({
+        error: 'Registration failed!', 
+        details: errorDetails
+      });
     }
 
     const data = await response.json();
     console.log('External API success response:', JSON.stringify(data, null, 2));
-    res.json(data);
+    
+    // Return success response
+    res.json({
+      success: true,
+      message: 'User registered successfully',
+      data: data
+    });
+    
   } catch (error) {
     console.error('Server error:', error);
-    res.status(500).json({error:'Server Error!', details: error.toString()});
+    res.status(500).json({
+      error: 'Server Error!', 
+      details: error.toString()
+    });
   }
 });
+//WORKING CODE WITH PHONE,GENDER,COUNTRY AND BCRYPT
+// app.post('/api/Register', async (req, res) => {
+//   try {
+//     console.log('Received registration request:', req.body);
+
+//     const requiredFields = [
+//       'name', 'mail', 'pass',
+//       'field_first_name', 'field_last_name',
+//       'field_phone_number', 'field_gender',
+//       'field_nationality'
+//     ];
+
+//     for (const field of requiredFields) {
+//       if (!req.body[field] || !req.body[field][0]?.value) {
+//         return res.status(400).json({ error: 'Validation failed', details: `Missing required field: ${field}` });
+//       }
+//     }
+
+//     const email = req.body.mail[0].value;
+//     const phone = req.body.field_phone_number[0].value;
+//     const gender = req.body.field_gender[0].value.toLowerCase();
+
+//     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+//       return res.status(400).json({ error: 'Validation failed', details: 'Invalid email format' });
+
+//     if (!/^[\+]?[1-9][\d]{0,15}$/.test(phone.replace(/[\s\-\(\)]/g, '')))
+//       return res.status(400).json({ error: 'Validation failed', details: 'Invalid phone number format' });
+
+//     if (!['male', 'female'].includes(gender))
+//       return res.status(400).json({ error: 'Validation failed', details: 'Invalid gender value' });
+
+//     //Hash password before sending to external API
+//     const plainPassword = req.body.pass[0].value;
+//     const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+//     const externalPayload = {
+//       ...req.body,
+//       pass: [{ value: hashedPassword }]
+//     };
+
+//     const response = await fetch('https://zodr.zodml.org/entity/user?_format=json', {
+//       method: 'POST',
+//       headers: {
+//         'Authorization': 'Basic dGVzdG1hbjpUaWdlcnMzbWUuJA==',
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify(externalPayload)
+//     });
+
+//     if (!response.ok) {
+//       const text = await response.text();
+//       let errorDetails = text;
+//       try {
+//         const errorData = JSON.parse(text);
+//         errorDetails = errorData.message || errorData.error || text;
+//       } catch {}
+//       return res.status(response.status).json({ error: 'Registration failed', details: errorDetails });
+//     }
+
+//     const data = await response.json();
+//     res.status(201).json({ message: 'Registration successful', data });
+//   } catch (err) {
+//     console.error('Registration error:', err);
+//     res.status(500).json({ error: 'Server error', details: err.message });
+//   }
+// });
+
+
+
 
 
 // Endpoint for user login
 // This method uses the working Drupal user login method
+
+
+
 app.post('/api/login', async (req, res) => {
   try {
     console.log('Received login request:', JSON.stringify(req.body, null, 2));
@@ -185,307 +342,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// // New login endpoint that combines Drupal login and OAuth token retrieval
-// app.post('/api/login', async (req, res) => {
-//   try {
-//     console.log('Received login request:', JSON.stringify(req.body, null, 2));
-
-//     const { username, password } = req.body;
-
-//     if (!username || !password) {
-//       return res.status(400).json({ 
-//         success: false,
-//         error: 'Username and password are required' 
-//       });
-//     }
-
-//     // First, verify user credentials with Drupal user login
-//     try {
-//       const drupalResponse = await fetch('https://zodr.zodml.org/user/login?_format=json', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           'Accept': 'application/json'
-//         },
-//         body: JSON.stringify({ 
-//           name: username, 
-//           pass: password 
-//         })
-//       });
-      
-//       if (!drupalResponse.ok) {
-//         const errorDetails = await drupalResponse.text();
-//         console.log('Drupal login method failed:', errorDetails);
-//         return res.status(401).json({ 
-//           success: false,
-//           error: 'Login failed!', 
-//           message: 'Invalid credentials',
-//           details: errorDetails
-//         });
-//       }
-
-//       const drupalData = await drupalResponse.json();
-//       console.log('Drupal login successful, now getting OAuth token...');
-      
-//       // Get OAuth access token
-//       let oauthToken = null;
-//       try {
-//         const formData = new URLSearchParams();
-//         formData.append('grant_type', 'password');
-//         formData.append('username', username);
-//         formData.append('password', password);
-//         formData.append('client_id', 'testman');
-//         formData.append('client_secret', 'Tigers3me.$');
-
-//         const oauthResponse = await fetch('https://zodr.zodml.org/oauth/token', {
-//           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/x-www-form-urlencoded',
-//             'Accept': 'application/json'
-//           },
-//           body: formData.toString()
-//         });
-
-//         if (oauthResponse.ok) {
-//           oauthToken = await oauthResponse.json();
-//           console.log('OAuth token obtained successfully');
-//         } else {
-//           console.log('OAuth token request failed, continuing with session auth');
-//         }
-//       } catch (oauthErr) {
-//         console.log('OAuth token request error:', oauthErr.message);
-//       }
-
-//       // Fetch detailed user profile if we have OAuth token
-//       let userProfile = null;
-//       if (oauthToken && drupalData.current_user?.uid) {
-//         try {
-//           const profileResponse = await fetch(`https://zodr.zodml.org/jsonapi/user/user/${drupalData.current_user.uid}`, {
-//             method: 'GET',
-//             headers: {
-//               'Authorization': `Bearer ${oauthToken.access_token}`,
-//               'Accept': 'application/vnd.api+json',
-//               'Content-Type': 'application/vnd.api+json'
-//             }
-//           });
-
-//           if (profileResponse.ok) {
-//             const profileData = await profileResponse.json();
-//             console.log('User profile fetched successfully');
-            
-//             // Extract and structure user profile data
-//             userProfile = {
-//               uid: profileData.data.attributes.drupal_internal__uid,
-//               name: profileData.data.attributes.name,
-//               displayName: profileData.data.attributes.display_name,
-//               mail: profileData.data.attributes.mail,
-//               status: profileData.data.attributes.status,
-//               created: profileData.data.attributes.created,
-//               changed: profileData.data.attributes.changed,
-//               // Custom fields (adjust based on your Drupal setup)
-//               firstName: profileData.data.attributes.field_first_name || '',
-//               lastName: profileData.data.attributes.field_last_name || '',
-//               phone: profileData.data.attributes.field_phone || '',
-//               // Handle profile picture if it exists
-//               profilePicture: profileData.data.relationships?.user_picture?.data
-//                 ? `https://zodr.zodml.org${profileData.data.relationships.user_picture.data.attributes?.uri?.url || ''}`
-//                 : null,
-//               // Extract roles
-//               roles: profileData.data.relationships?.roles?.data?.map(role => role.id) || []
-//             };
-//           }
-//         } catch (profileErr) {
-//           console.log('Failed to fetch user profile:', profileErr.message);
-//         }
-//       }
-
-//       // Prepare user info (use profile data if available, otherwise fallback to basic data)
-//       const userInfo = userProfile || {
-//         uid: drupalData.current_user?.uid,
-//         name: drupalData.current_user?.name,
-//         mail: drupalData.current_user?.mail || '',
-//         roles: drupalData.current_user?.roles || [],
-//         csrf_token: drupalData.csrf_token,
-//         logout_token: drupalData.logout_token,
-//         firstName: '',
-//         lastName: '',
-//         phone: '',
-//         profilePicture: null
-//       };
-
-//       // Prepare response based on whether we have OAuth token
-//       const response = {
-//         success: true,
-//         message: oauthToken ? 'Login successful' : 'Login successful (session-based)',
-//         user: userInfo,
-//         data: drupalData
-//       };
-
-//       // Add OAuth token data if available
-//       if (oauthToken) {
-//         response.access_token = oauthToken.access_token;
-//         response.refresh_token = oauthToken.refresh_token;
-//         response.token_type = oauthToken.token_type;
-//         response.expires_in = oauthToken.expires_in;
-//       }
-
-//       return res.json(response);
-
-//     } catch (err) {
-//       console.log('Drupal login method error:', err.message);
-//       return res.status(500).json({ 
-//         success: false,
-//         error: 'Server Error!', 
-//         message: 'An error occurred during login',
-//         details: err.message
-//       });
-//     }
-
-//   } catch (error) {
-//     console.error('Login server error:', error);
-//     res.status(500).json({ 
-//       success: false,
-//       error: 'Server Error!', 
-//       message: 'An error occurred during login',
-//       details: error.toString() 
-//     });
-//   }
-// });
-// // Add a new endpoint to fetch user profile separately
-// app.get('/api/user/profile/:userId', async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const authHeader = req.headers.authorization;
-
-//     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-//       return res.status(401).json({
-//         success: false,
-//         error: 'Authorization token required'
-//       });
-//     }
-
-//     const token = authHeader.substring(7);
-
-//     const profileResponse = await fetch(`https://zodr.zodml.org/jsonapi/user/user/${userId}`, {
-//       method: 'GET',
-//       headers: {
-//         'Authorization': `Bearer ${token}`,
-//         'Accept': 'application/vnd.api+json',
-//         'Content-Type': 'application/vnd.api+json'
-//       }
-//     });
-
-//     if (!profileResponse.ok) {
-//       const errorText = await profileResponse.text();
-//       return res.status(profileResponse.status).json({
-//         success: false,
-//         error: 'Failed to fetch user profile',
-//         details: errorText
-//       });
-//     }
-
-//     const profileData = await profileResponse.json();
-    
-//     // Structure the profile data
-//     const userProfile = {
-//       uid: profileData.data.attributes.drupal_internal__uid,
-//       name: profileData.data.attributes.name,
-//       displayName: profileData.data.attributes.display_name,
-//       mail: profileData.data.attributes.mail,
-//       status: profileData.data.attributes.status,
-//       created: profileData.data.attributes.created,
-//       changed: profileData.data.attributes.changed,
-//       firstName: profileData.data.attributes.field_first_name || '',
-//       lastName: profileData.data.attributes.field_last_name || '',
-//       phone: profileData.data.attributes.field_phone || '',
-//       profilePicture: profileData.data.relationships?.user_picture?.data
-//         ? `https://zodr.zodml.org${profileData.data.relationships.user_picture.data.attributes?.uri?.url || ''}`
-//         : null,
-//       roles: profileData.data.relationships?.roles?.data?.map(role => role.id) || []
-//     };
-
-//     res.json({
-//       success: true,
-//       user: userProfile
-//     });
-
-//   } catch (error) {
-//     console.error('Profile fetch error:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Server Error!',
-//       message: 'An error occurred while fetching profile',
-//       details: error.toString()
-//     });
-//   }
-// });
-// // Add endpoint to update user profile
-// app.patch('/api/user/profile/:userId', async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const { firstName, lastName, phone, email } = req.body;
-//     const authHeader = req.headers.authorization;
-
-//     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-//       return res.status(401).json({
-//         success: false,
-//         error: 'Authorization token required'
-//       });
-//     }
-
-//     const token = authHeader.substring(7);
-
-//     const updateData = {
-//       data: {
-//         type: 'user--user',
-//         id: userId,
-//         attributes: {}
-//       }
-//     };
-
-//     // Add fields that are being updated
-//     if (firstName !== undefined) updateData.data.attributes.field_first_name = firstName;
-//     if (lastName !== undefined) updateData.data.attributes.field_last_name = lastName;
-//     if (phone !== undefined) updateData.data.attributes.field_phone = phone;
-//     if (email !== undefined) updateData.data.attributes.mail = email;
-
-//     const updateResponse = await fetch(`https://zodr.zodml.org/jsonapi/user/user/${userId}`, {
-//       method: 'PATCH',
-//       headers: {
-//         'Authorization': `Bearer ${token}`,
-//         'Accept': 'application/vnd.api+json',
-//         'Content-Type': 'application/vnd.api+json'
-//       },
-//       body: JSON.stringify(updateData)
-//     });
-
-//     if (!updateResponse.ok) {
-//       const errorText = await updateResponse.text();
-//       return res.status(updateResponse.status).json({
-//         success: false,
-//         error: 'Failed to update user profile',
-//         details: errorText
-//       });
-//     }
-
-//     const updatedData = await updateResponse.json();
-    
-//     res.json({
-//       success: true,
-//       message: 'Profile updated successfully',
-//       user: updatedData.data
-//     });
-
-//   } catch (error) {
-//     console.error('Profile update error:', error);
-//     res.status(500).json({
-//       success: false,
-//       error: 'Server Error!',
-//       message: 'An error occurred while updating profile',
-//       details: error.toString()
-//     });
-//   }
-// });
 
 
 // Endpoint for fetching all hotels

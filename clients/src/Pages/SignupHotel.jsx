@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, User, Mail, Lock, Eye, EyeOff, Phone, Globe } from 'lucide-react';
+import { Menu, X, User, Mail, Lock, Eye, EyeOff, Phone, ArrowLeftFromLine, Globe } from 'lucide-react';
 import login_hotel_logo from '../Components/Assets/hotel_logo.png';
 import './CSS/SignUp.css';
 import Navbar from '../Components/Navbar/Navbar';
 import { useNavigate } from "react-router-dom"; 
 
 
-
-const SignUp = () => {
+// HOTEL OWNER REGISTRATION
+const SignupHotel = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -24,7 +24,8 @@ const SignUp = () => {
     confirmPassword: '',
     phoneNumber: '',
     gender: '',
-    country: ''
+    country: '',
+    address: ''
   });
   
 
@@ -61,10 +62,6 @@ const SignUp = () => {
     fetchCountries();
   }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   const handleInputChange = (e) => {
     setFormData({ 
       ...formData, 
@@ -77,7 +74,7 @@ const SignUp = () => {
   const validateForm = () => {
     // Check if all fields are filled
     if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || 
-        !formData.password || !formData.phoneNumber.trim() || !formData.gender || !formData.country) {
+        !formData.password || !formData.phoneNumber.trim() || !formData.gender || !formData.country || !formData.address) {
       setError('Please fill in all fields');
       return false;
     }
@@ -144,6 +141,7 @@ const SignUp = () => {
         field_phone_number: [{ value: formData.phoneNumber.trim() }],
         field_gender: [{ value: formData.gender }],
         field_nationality: [{ value: formData.country }],
+        field_address: [{ value: formData.address.trim() }],
       };
 
       console.log('Sending registration payload:', JSON.stringify(payload, null, 2));
@@ -174,12 +172,13 @@ const SignUp = () => {
           confirmPassword: '',
           phoneNumber: '',
           gender: '',
-          country: ''
+          country: '',
+          address: '' 
         });
 
         setTimeout(() => {
-          window.location.href = '/login';
-        }, 2500);
+          window.location.href = '/hotel-owner-profile';
+        }, 2000);
 
       } else {
         // Try to parse error details
@@ -217,15 +216,6 @@ const SignUp = () => {
   };
 
   const navigate = useNavigate();
-    const handleUserTypeChange = (e) => {
-      const selectedValue = e.target.value;
-
-      if (selectedValue === "hotel_owner") {
-        // redirect to hotel owner registration page
-        navigate("/register-hotel-owner");
-      }
-      // If it's "hotel_user", do nothing (stay on the same page)
-  }
 
   return (
     <div className="signup-container">
@@ -239,7 +229,7 @@ const SignUp = () => {
             {/* Logo Section */}
             <div className="signup-logo">
               <img src={login_hotel_logo} alt="Hotel logo" height="18px" width="120px" />
-              <h3>Sign Up</h3>
+              <h3>Sign Up as Hotel Owner</h3>
             </div>
 
             {/* Error Message */}
@@ -351,7 +341,7 @@ const SignUp = () => {
               {/* Phone Number Field */}
               <div className="field-group">
                 <label htmlFor="phoneNumber" className="field-label">
-                    Phone Number
+                    Contact Number
                 </label>
                 <div className="input-wrapper">
                     <Phone className="input-icon" size={18} aria-hidden="true" />
@@ -438,6 +428,26 @@ const SignUp = () => {
                 )}
               </div>
 
+              {/* Hotel contact address */}
+                <div className="field-group">
+                <label htmlFor="address" className="field-label">
+                    Hotel Address
+                </label>
+                <div className="input-wrapper">
+                    <textarea
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="Enter address of contact person"
+                    required
+                    disabled={isLoading}
+                    rows="4"
+                    ></textarea>
+                </div>
+                </div>
+
               {/* Password Field */}
               <div className="field-group">
                 <label htmlFor="password" className="field-label">
@@ -502,11 +512,7 @@ const SignUp = () => {
               </div>
 
               {/* User Type Selection */}
-              <div className="field-group">
-              <label className="userType">
-                    Guest or Hotel owner
-                </label>
-              <div className="input-wrapper">
+              {/* <div className="input-wrapper">
                 <User className="input-icon" size={18} aria-hidden="true" />
                 <select
                   id="userType"
@@ -520,8 +526,13 @@ const SignUp = () => {
                   <option value="hotel_user">Hotel User / Guest</option>
                   <option value="hotel_owner">Hotel Owner / Partner</option>
                 </select>
-              </div>
-              </div>
+              </div> */}
+            <div
+                className="input-wrapper cursor-pointer signup-go-gack"
+                onClick={() => navigate('/signup')}
+                >
+                <ArrowLeftFromLine className="input-icon" size={24} aria-hidden="true" />
+            </div>
 
               {/* Terms and Policy */}
               <div className="policy">
@@ -565,5 +576,6 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignupHotel;
+
 

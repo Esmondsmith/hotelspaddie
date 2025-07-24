@@ -234,10 +234,20 @@
   outline: none;
   box-sizing: border-box;
 }
-
 .form-input:focus {
   border-color: #14b8a6;
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+.radio-group {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+.radio-option {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .password-input {
@@ -316,6 +326,29 @@
   text-decoration: none;
   cursor: pointer;
 }
+/*sign up Go back button style */
+.input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+.signup-go-gack{
+  border: 2px solid #00504B;
+  width: 50px;
+  height: 20px;
+  padding: 15px;
+  border-radius: 6px;
+  .input-icon{
+    color: #00504B;
+  }
+}
+.signup-go-gack:hover {
+  transform: scale(1.1);
+}
+/* .input-wrapper:hover {
+  transform: scale(1.1);
+} */
 
 /* Media Queries */
 @media (min-width: 480px) {
@@ -344,10 +377,6 @@
   
 }
 
-@media (min-width: 1024px) {
-  
-  
-}
 
 
 
