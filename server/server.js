@@ -26,7 +26,6 @@ app.post('/api/Register', async (req, res) => {
         });
       }
     }
-
     // Additional validation for specific fields
     const email = req.body.mail[0].value;
     const phoneNumber = req.body.field_phone_number[0].value;
@@ -344,7 +343,378 @@ app.post('/api/login', async (req, res) => {
 
 
 
-// Endpoint for fetching all hotels
+// app.get('/api/user-info', async (req, res) => {
+//   try {
+//     console.log('Received user-info request');
+//     console.log('Headers:', req.headers);
+
+//     // Extract token from Authorization header
+//     const authHeader = req.headers.authorization;
+//     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+//       return res.status(401).json({
+//         success: false,
+//         error: 'Authorization token required',
+//         message: 'Please provide a valid access token'
+//       });
+//     }
+
+//     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+//     console.log('Extracted token:', token ? 'Present' : 'Missing');
+//     console.log('Token length:', token ? token.length : 0);
+
+//     try {
+//       // Call the Drupal API to get user info
+//       const drupalResponse = await fetch('https://zodr.zodml.org/api/user-info', {
+//         method: 'GET',
+//         headers: {
+//           'Authorization': `Bearer ${token}`,
+//           'Content-Type': 'application/json',
+//           'Accept': 'application/json'
+//         }
+//       });
+
+//       console.log('Drupal API response status:', drupalResponse.status);
+//       console.log('Drupal API response headers:', Object.fromEntries(drupalResponse.headers.entries()));
+
+//       if (!drupalResponse.ok) {
+//         const errorText = await drupalResponse.text();
+//         console.log('Drupal API error response:', errorText);
+        
+//         return res.status(drupalResponse.status).json({
+//           success: false,
+//           error: 'Failed to fetch user information',
+//           message: 'Unable to retrieve user data from the server',
+//           details: errorText
+//         });
+//       }
+
+//       const userData = await drupalResponse.json();
+//       console.log('User data received from Drupal:', userData);
+
+//       // Return the user data
+//       return res.json({
+//         success: true,
+//         message: 'User information retrieved successfully',
+//         user: userData
+//       });
+
+//     } catch (drupalError) {
+//       console.error('Error calling Drupal API:', drupalError);
+//       return res.status(500).json({
+//         success: false,
+//         error: 'External API Error',
+//         message: 'Failed to communicate with the user service',
+//         details: drupalError.message
+//       });
+//     }
+
+//   } catch (error) {
+//     console.error('User-info server error:', error);
+//     res.status(500).json({
+//       success: false,
+//       error: 'Server Error',
+//       message: 'An internal server error occurred',
+//       details: error.toString()
+//     });
+//   }
+// });
+app.get('/api/user-info', async (req, res) => {
+  try {
+    console.log('Received user-info request');
+    console.log('Headers:', req.headers);
+
+    // Extract token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authorization token required',
+        message: 'Please provide a valid access token'
+      });
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log('Extracted token:', token ? 'Present' : 'Missing');
+    console.log('Token length:', token ? token.length : 0);
+
+    // Check if this is a session token or OAuth token
+    let isSessionToken = false;
+    let sessionData = null;
+
+    try {
+      // Try to decode as session token first
+      sessionData = JSON.parse(atob(token));
+      isSessionToken = true;
+      console.log('Detected session token:', sessionData);
+    } catch (error) {
+      // If decoding fails, assume it's an OAuth token
+      isSessionToken = false;
+      console.log('Detected OAuth token');
+    }
+
+    if (isSessionToken && sessionData) {
+      // Handle session token - return basic user info
+      console.log('Returning session-based user info');
+      
+      return res.json({
+        success: true,
+        message: 'User information retrieved successfully (session-based)',
+        user: {
+          uid: sessionData.uid,
+          name: sessionData.name,
+          roles: sessionData.roles || ['authenticated'],
+          
+          // Set empty fields that can be filled later
+          mail: '',
+          field_first_name: '',
+          field_last_name: '',
+          field_phone_number: '',
+          field_gender: '',
+          field_nationality: '',
+          field_type_of_id: '',
+          field_id_number: '',
+          field_upload_id_scan_photo: '',
+          
+          // Metadata
+          created: sessionData.timestamp ? Math.floor(sessionData.timestamp / 1000) : null,
+          updated: sessionData.timestamp ? Math.floor(sessionData.timestamp / 1000) : null,
+          status: true,
+          isProfileComplete: false
+        }
+      });
+    }
+
+    // Handle OAuth token - call Drupal API
+    try {
+      console.log('Calling Drupal API with OAuth token...');
+      
+      // First, get current user info
+      const userResponse = await fetch('https://zodr.zodml.org/jsonapi/user/user/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.api+json',
+          'Content-Type': 'application/vnd.api+json'
+        }
+      });
+
+      console.log('Drupal user API response status:', userResponse.status);
+
+      if (!userResponse.ok) {
+        const errorText = await userResponse.text();
+        console.log('Drupal user API error response:', errorText);
+        
+        return res.status(userResponse.status).json({
+          success: false,
+          error: 'Failed to fetch user information',
+          message: 'Unable to retrieve user data from the server',
+          details: errorText
+        });
+      }
+
+      const userData = await userResponse.json();
+      console.log('User data received from Drupal:', JSON.stringify(userData, null, 2));
+
+      // Extract user information from the response
+      const userInfo = userData.data;
+      if (!userInfo) {
+        return res.status(404).json({
+          success: false,
+          error: 'User not found',
+          message: 'No user data available'
+        });
+      }
+
+      // Transform the user data to a consistent format
+      const transformedUser = {
+        uid: userInfo.id,
+        name: userInfo.attributes.name || userInfo.attributes.display_name,
+        mail: userInfo.attributes.mail,
+        
+        // Personal information - handle both direct values and Drupal field format
+        field_first_name: extractFieldValue(userInfo.attributes.field_first_name),
+        field_last_name: extractFieldValue(userInfo.attributes.field_last_name),
+        field_phone_number: extractFieldValue(userInfo.attributes.field_phone_number || userInfo.attributes.field_phone),
+        field_gender: extractFieldValue(userInfo.attributes.field_gender),
+        field_nationality: extractFieldValue(userInfo.attributes.field_nationality),
+        field_type_of_id: extractFieldValue(userInfo.attributes.field_type_of_id),
+        field_id_number: extractFieldValue(userInfo.attributes.field_id_number),
+        field_upload_id_scan_photo: extractFieldValue(userInfo.attributes.field_upload_id_scan_photo),
+        
+        // Metadata
+        roles: userInfo.attributes.roles || ['authenticated'],
+        created: userInfo.attributes.created,
+        updated: userInfo.attributes.changed || userInfo.attributes.updated,
+        status: userInfo.attributes.status !== undefined ? userInfo.attributes.status : true,
+        
+        // Calculate profile completeness
+        isProfileComplete: !!(
+          extractFieldValue(userInfo.attributes.field_first_name) && 
+          extractFieldValue(userInfo.attributes.field_last_name) && 
+          extractFieldValue(userInfo.attributes.field_phone_number || userInfo.attributes.field_phone)
+        )
+      };
+
+      console.log('Transformed user data:', transformedUser);
+
+      // Return the user data
+      return res.json({
+        success: true,
+        message: 'User information retrieved successfully',
+        user: transformedUser
+      });
+
+    } catch (drupalError) {
+      console.error('Error calling Drupal API:', drupalError);
+      return res.status(500).json({
+        success: false,
+        error: 'External API Error',
+        message: 'Failed to communicate with the user service',
+        details: drupalError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('User-info server error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server Error',
+      message: 'An internal server error occurred',
+      details: error.toString()
+    });
+  }
+});
+
+// Helper function to extract field values from various formats
+function extractFieldValue(field) {
+  if (!field) return '';
+  if (typeof field === 'string') return field;
+  if (Array.isArray(field) && field.length > 0) {
+    return field[0].value || field[0];
+  }
+  if (field.value !== undefined) return field.value;
+  return '';
+}
+
+// Optional: Add an endpoint to update user profile
+app.patch('/api/user/profile/:uid', async (req, res) => {
+  try {
+    console.log('Received profile update request for UID:', req.params.uid);
+    console.log('Update data:', req.body);
+
+    // Extract token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authorization token required'
+      });
+    }
+
+    const token = authHeader.substring(7);
+    const { firstName, lastName, phone, email } = req.body;
+
+    try {
+      // Update user profile via Drupal API
+      const updateData = {
+        field_first_name: [{ value: firstName }],
+        field_last_name: [{ value: lastName }],
+        field_phone_number: [{ value: phone }],
+        mail: [{ value: email }]
+      };
+
+      const drupalResponse = await fetch(`https://zodr.zodml.org/user/${req.params.uid}?_format=json`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (!drupalResponse.ok) {
+        const errorText = await drupalResponse.text();
+        console.log('Drupal update error:', errorText);
+        
+        return res.status(drupalResponse.status).json({
+          success: false,
+          error: 'Failed to update user profile',
+          details: errorText
+        });
+      }
+
+      const updatedData = await drupalResponse.json();
+      console.log('Profile updated successfully:', updatedData);
+
+      return res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        user: updatedData
+      });
+
+    } catch (drupalError) {
+      console.error('Error updating profile via Drupal API:', drupalError);
+      return res.status(500).json({
+        success: false,
+        error: 'External API Error',
+        message: 'Failed to update user profile',
+        details: drupalError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('Profile update server error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server Error',
+      message: 'An internal server error occurred',
+      details: error.toString()
+    });
+  }
+});
+
+// Optional: Add endpoint for profile picture upload
+app.post('/api/user/upload-picture', async (req, res) => {
+  try {
+    console.log('Received profile picture upload request');
+
+    // Extract token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authorization token required'
+      });
+    }
+
+    const token = authHeader.substring(7);
+
+    // Here you would implement file upload logic
+    // This is a placeholder implementation
+    // You might want to use multer for file handling and then upload to Drupal
+
+    return res.json({
+      success: true,
+      message: 'Profile picture upload endpoint - implementation needed',
+      profilePicture: 'placeholder-url'
+    });
+
+  } catch (error) {
+    console.error('Profile picture upload error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server Error',
+      message: 'Failed to upload profile picture',
+      details: error.toString()
+    });
+  }
+});
+
+
+
+
+// // Fixed backend API endpoints with improved filtering logic
 app.get('/api/hotels', async (req, res) => {
   try {
     console.log('Fetching hotels from external API...');
@@ -374,11 +744,231 @@ app.get('/api/hotels', async (req, res) => {
   }
 });
 
+// Enhanced endpoint for searching hotels with filters
+app.get('/api/search/hotels-advanced', async (req, res) => {
+  try {
+    console.log('Advanced searching hotels with filters:', req.query);
 
-// New endpoint for searching hotels with filters
+    // First, fetch all hotels
+    const response = await fetch('https://zodr.zodml.org/api/hotels', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('Hotels API Error!', text);
+      return res.status(response.status).json({error:'Failed to fetch hotels!', details: text});
+    }
+
+    const data = await response.json();
+    let hotels = Array.isArray(data) ? data : (data.data ? data.data : []);
+    
+    console.log(`Starting with ${hotels.length} hotels`);
+    console.log('Sample hotel structure:', hotels[0] ? Object.keys(hotels[0]) : 'No hotels');
+    
+    // Apply state filter - improved logic to handle different field names
+    if (req.query.field_state_target_id) {
+      const stateId = req.query.field_state_target_id;
+      const stateIdNum = parseInt(stateId);
+      
+      // Map state IDs to names for fallback matching
+      const stateMap = {
+        32: 'Lagos',
+        33: 'Abuja', 
+        34: 'Kano',
+        35: 'Port Harcourt',
+        36: 'Ibadan'
+      };
+      
+      const stateName = stateMap[stateIdNum];
+      
+      hotels = hotels.filter(hotel => {
+        // Check various possible state field formats
+        const stateFields = [
+          hotel.field_state_target_id,
+          hotel.field_state,
+          hotel.field_state_info?.target_id,
+          hotel.field_city,
+          hotel.field_location
+        ];
+        
+        return stateFields.some(field => {
+          if (!field) return false;
+          
+          // Check for exact ID match
+          if (field === stateIdNum || field === stateId) return true;
+          
+          // Check for name match (case insensitive)
+          if (typeof field === 'string' && stateName) {
+            return field.toLowerCase().includes(stateName.toLowerCase());
+          }
+          
+          return false;
+        });
+      });
+      
+      console.log(`After state filter (${stateName}): ${hotels.length} hotels`);
+    }
+    
+    // Apply title/location filter with improved search
+    if (req.query.title) {
+      const searchTerm = req.query.title.toLowerCase().trim();
+      
+      hotels = hotels.filter(hotel => {
+        const searchableFields = [
+          hotel.title,
+          hotel.field_location,
+          hotel.field_city,
+          hotel.field_state,
+          hotel.field_body
+        ];
+        
+        return searchableFields.some(field => {
+          return field && typeof field === 'string' && 
+                 field.toLowerCase().includes(searchTerm);
+        });
+      });
+      
+      console.log(`After title filter (${searchTerm}): ${hotels.length} hotels`);
+    }
+    
+    // Apply rating filter - enhanced logic
+    if (req.query.field_rating_value) {
+      const targetRating = parseInt(req.query.field_rating_value);
+      
+      hotels = hotels.filter(hotel => {
+        const hotelRatingFields = [
+          hotel.field_rating,
+          hotel.field_rating_value,
+          hotel.rating
+        ];
+        
+        const hotelRating = hotelRatingFields.find(rating => rating !== undefined && rating !== null);
+        
+        if (hotelRating === undefined || hotelRating === null) return false;
+        
+        const ratingNum = parseFloat(hotelRating);
+        
+        // Filter for hotels with rating >= target rating
+        // You can change this to exact match (===) if preferred
+        return !isNaN(ratingNum) && Math.floor(ratingNum) >= targetRating;
+      });
+      
+      console.log(`After rating filter (>= ${targetRating} stars): ${hotels.length} hotels`);
+    }
+    
+    // Apply amenities filter - enhanced logic for both ID and name matching
+    if (req.query.field_amenities_target_id) {
+      const amenityId = req.query.field_amenities_target_id;
+      const amenityIdNum = parseInt(amenityId);
+      
+      // Map amenity IDs to names for fallback matching
+      const amenityMap = {
+        20: 'Wi-Fi',
+        21: 'Parking',
+        22: 'Gym/Fitness Center',
+        23: 'Restaurant',
+        24: 'Bar/Lounge',
+        25: 'Swimming Pool',
+        26: 'Spa',
+        27: 'Business Center'
+      };
+      
+      const amenityName = amenityMap[amenityIdNum];
+      
+      hotels = hotels.filter(hotel => {
+        // Check various amenity field formats
+        const amenityFields = [
+          hotel.field_amenities_target_id,
+          hotel.field_amenities,
+          hotel.amenities
+        ];
+        
+        return amenityFields.some(field => {
+          if (!field) return false;
+          
+          // Handle array of IDs
+          if (Array.isArray(field)) {
+            return field.some(item => 
+              item === amenityIdNum || 
+              item === amenityId ||
+              (typeof item === 'string' && amenityName && 
+               item.toLowerCase().includes(amenityName.toLowerCase()))
+            );
+          }
+          
+          // Handle comma-separated string of IDs or names
+          if (typeof field === 'string') {
+            const items = field.split(',').map(item => item.trim());
+            
+            return items.some(item => {
+              // Check for ID match
+              if (item === amenityId || parseInt(item) === amenityIdNum) return true;
+              
+              // Check for name match (case insensitive)
+              if (amenityName && item.toLowerCase().includes(amenityName.toLowerCase())) {
+                return true;
+              }
+              
+              // Also check if the search amenity name is contained in the hotel amenity
+              if (amenityName && amenityName.toLowerCase().includes(item.toLowerCase())) {
+                return true;
+              }
+              
+              return false;
+            });
+          }
+          
+          // Handle single ID
+          return field === amenityIdNum || field === amenityId;
+        });
+      });
+      
+      console.log(`After amenities filter (${amenityName}): ${hotels.length} hotels`);
+    }
+    
+    console.log(`Final filtered result: ${hotels.length} hotels`);
+    
+    // Log some debug info about the first few hotels
+    if (hotels.length > 0) {
+      hotels.slice(0, 2).forEach((hotel, index) => {
+        console.log(`Hotel ${index + 1} sample data:`, {
+          title: hotel.title,
+          state_fields: {
+            field_state_target_id: hotel.field_state_target_id,
+            field_state: hotel.field_state,
+            field_city: hotel.field_city,
+            field_location: hotel.field_location
+          },
+          rating_fields: {
+            field_rating: hotel.field_rating,
+            field_rating_value: hotel.field_rating_value,
+            rating: hotel.rating
+          },
+          amenity_fields: {
+            field_amenities_target_id: hotel.field_amenities_target_id,
+            field_amenities: hotel.field_amenities,
+            amenities: hotel.amenities
+          }
+        });
+      });
+    }
+    
+    res.json(hotels);
+  } catch (error) {
+    console.error('Advanced search API error:', error);
+    res.status(500).json({error:'Failed to search hotels!', details: error.toString()});
+  }
+});
+
+// Backup simple search endpoint
 app.get('/api/search/hotels', async (req, res) => {
   try {
-    console.log('Searching hotels with filters:', req.query);
+    console.log('Simple searching hotels with filters:', req.query);
 
     // Build the search URL with query parameters
     const baseUrl = 'https://zodr.zodml.org/api/search/hotels';
@@ -412,24 +1002,27 @@ app.get('/api/search/hotels', async (req, res) => {
     console.log('Search API response status:', response.status);
 
     if (!response.ok) {
-      const text = await response.text();
-      console.error('Search API Error!', text);
-      return res.status(response.status).json({error:'Failed to search hotels!', details: text});
+      console.log('External search API failed, falling back to advanced search');
+      // If external search fails, fall back to our advanced search
+      return res.redirect(`/api/search/hotels-advanced?${req.url.split('?')[1] || ''}`);
     }
 
     const data = await response.json();
-    console.log('Search API success response:', JSON.stringify(data, null, 2));
+    console.log('Search API success response length:', Array.isArray(data) ? data.length : 'Not array');
+    
     // Ensure we return an array
-    const hotels = Array.isArray(data) ? data : (data.data ? data.data : []);
+    let hotels = Array.isArray(data) ? data : (data.data ? data.data : []);
+    
     res.json(hotels);
   } catch (error) {
-    console.error('Search API error:', error);
-    res.status(500).json({error:'Failed to search hotels!', details: error.toString()});
+    console.error('Search API error, falling back to advanced search:', error);
+    // Fall back to advanced search if external API fails
+    req.url = req.url.replace('/api/search/hotels', '/api/search/hotels-advanced');
+    return res.redirect(`/api/search/hotels-advanced?${req.url.split('?')[1] || ''}`);
   }
 });
 
-
-// Endpoint for fetching hotel rooms
+// Endpoint for fetching hotel rooms (unchanged)
 app.get('/api/hotel-rooms', async (req, res) => {
   try {
     const { nid } = req.query;
@@ -469,6 +1062,232 @@ app.get('/api/hotel-rooms', async (req, res) => {
     res.status(500).json({error:'Failed to fetch hotel rooms!', details: error.toString()});
   }
 });
+
+
+
+
+
+// // // Endpoint for fetching all hotels
+// app.get('/api/hotels', async (req, res) => {
+//   try {
+//     console.log('Fetching hotels from external API...');
+
+//     const response = await fetch('https://zodr.zodml.org/api/hotels', {
+//       method: 'GET',
+//       headers: {
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     console.log('Hotels API response status:', response.status);
+
+//     if (!response.ok) {
+//       const text = await response.text();
+//       console.error('Hotels API Error!', text);
+//       return res.status(response.status).json({error:'Failed to fetch hotels!', details: text});
+//     }
+
+//     const data = await response.json();
+//     console.log('Hotels API success response:', JSON.stringify(data, null, 2));
+//     res.json(data);
+//   } catch (error) {
+//     console.error('Hotels API error:', error);
+//     res.status(500).json({error:'Failed to fetch hotels!', details: error.toString()});
+//   }
+// });
+
+// // New endpoint for searching hotels with filters
+// app.get('/api/search/hotels', async (req, res) => {
+//   try {
+//     console.log('Searching hotels with filters:', req.query);
+
+//     // Build the search URL with query parameters
+//     const baseUrl = 'https://zodr.zodml.org/api/search/hotels';
+//     const queryParams = new URLSearchParams();
+
+//     // Add filters to query params if they exist
+//     if (req.query.field_state_target_id) {
+//       queryParams.append('field_state_target_id', req.query.field_state_target_id);
+//     }
+//     if (req.query.title) {
+//       queryParams.append('title', req.query.title);
+//     }
+//     if (req.query.field_rating_value) {
+//       queryParams.append('field_rating_value', req.query.field_rating_value);
+//     }
+//     if (req.query.field_amenities_target_id) {
+//       queryParams.append('field_amenities_target_id', req.query.field_amenities_target_id);
+//     }
+
+//     const searchUrl = queryParams.toString() ? `${baseUrl}?${queryParams.toString()}` : baseUrl;
+//     console.log('Search URL:', searchUrl);
+
+//     const response = await fetch(searchUrl, {
+//       method: 'GET',
+//       headers: {
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     console.log('Search API response status:', response.status);
+
+//     if (!response.ok) {
+//       const text = await response.text();
+//       console.error('Search API Error!', text);
+//       return res.status(response.status).json({error:'Failed to search hotels!', details: text});
+//     }
+
+//     const data = await response.json();
+//     console.log('Search API success response:', JSON.stringify(data, null, 2));
+    
+//     // Ensure we return an array
+//     let hotels = Array.isArray(data) ? data : (data.data ? data.data : []);
+    
+//     // Apply case-insensitive filtering on the frontend side
+//     if (req.query.title) {
+//       const searchTerm = req.query.title.toLowerCase();
+//       hotels = hotels.filter(hotel => {
+//         const title = hotel.title ? hotel.title.toLowerCase() : '';
+//         const location = hotel.field_location ? hotel.field_location.toLowerCase() : '';
+//         const body = hotel.field_body ? hotel.field_body.toLowerCase() : '';
+        
+//         return title.includes(searchTerm) || 
+//                location.includes(searchTerm) || 
+//                body.includes(searchTerm);
+//       });
+//     }
+    
+//     res.json(hotels);
+//   } catch (error) {
+//     console.error('Search API error:', error);
+//     res.status(500).json({error:'Failed to search hotels!', details: error.toString()});
+//   }
+// });
+
+// // Alternative endpoint for more robust search if the external API doesn't support case-insensitive search
+// app.get('/api/search/hotels-advanced', async (req, res) => {
+//   try {
+//     console.log('Advanced searching hotels with filters:', req.query);
+
+//     // First, fetch all hotels
+//     const response = await fetch('https://zodr.zodml.org/api/hotels', {
+//       method: 'GET',
+//       headers: {
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     if (!response.ok) {
+//       const text = await response.text();
+//       console.error('Hotels API Error!', text);
+//       return res.status(response.status).json({error:'Failed to fetch hotels!', details: text});
+//     }
+
+//     const data = await response.json();
+//     let hotels = Array.isArray(data) ? data : (data.data ? data.data : []);
+    
+//     // Apply filters
+//     if (req.query.field_state_target_id) {
+//       const stateId = parseInt(req.query.field_state_target_id);
+//       hotels = hotels.filter(hotel => 
+//         hotel.field_state_target_id === stateId || 
+//         hotel.field_state === stateId ||
+//         (hotel.field_state_info && hotel.field_state_info.target_id === stateId)
+//       );
+//     }
+    
+//     if (req.query.title) {
+//       const searchTerm = req.query.title.toLowerCase();
+//       hotels = hotels.filter(hotel => {
+//         const title = hotel.title ? hotel.title.toLowerCase() : '';
+//         const location = hotel.field_location ? hotel.field_location.toLowerCase() : '';
+//         const body = hotel.field_body ? hotel.field_body.toLowerCase() : '';
+        
+//         return title.includes(searchTerm) || 
+//                location.includes(searchTerm) || 
+//                body.includes(searchTerm);
+//       });
+//     }
+    
+//     if (req.query.field_rating_value) {
+//       const rating = parseFloat(req.query.field_rating_value);
+//       hotels = hotels.filter(hotel => {
+//         const hotelRating = parseFloat(hotel.field_rating || hotel.field_rating_value || 0);
+//         return hotelRating >= rating;
+//       });
+//     }
+    
+//     if (req.query.field_amenities_target_id) {
+//       const amenityId = parseInt(req.query.field_amenities_target_id);
+//       hotels = hotels.filter(hotel => {
+//         if (hotel.field_amenities_target_id) {
+//           // Handle if it's an array of IDs
+//           if (Array.isArray(hotel.field_amenities_target_id)) {
+//             return hotel.field_amenities_target_id.includes(amenityId);
+//           }
+//           // Handle if it's a single ID or comma-separated string
+//           const amenityIds = hotel.field_amenities_target_id.toString().split(',').map(id => parseInt(id.trim()));
+//           return amenityIds.includes(amenityId);
+//         }
+//         return false;
+//       });
+//     }
+    
+//     console.log(`Filtered ${hotels.length} hotels from search`);
+//     res.json(hotels);
+//   } catch (error) {
+//     console.error('Advanced search API error:', error);
+//     res.status(500).json({error:'Failed to search hotels!', details: error.toString()});
+//   }
+// });
+
+// // Endpoint for fetching hotel rooms
+// app.get('/api/hotel-rooms', async (req, res) => {
+//   try {
+//     const { nid } = req.query;
+//     if (!nid) {
+//       return res.status(400).json({ error: 'Missing nid parameter' });
+//     }
+
+//     const url = `https://zodr.zodml.org/api/hotel-rooms/${nid}`;
+//     console.log('Fetching hotel rooms from:', url);
+
+//     const response = await fetch(url, {
+//       method: 'GET',
+//       headers: {
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     console.log('Hotel rooms API response status:', response.status);
+
+//     if (!response.ok) {
+//       const text = await response.text();
+//       console.error('Hotel rooms API Error!', text);
+//       return res.status(response.status).json({error:'Failed to fetch hotel rooms!', details: text});
+//     }
+
+//     const data = await response.json();
+//     console.log("Hotel rooms API response:", data);
+
+//     if (!Array.isArray(data)) {
+//       return res.status(500).json({error:'Failed to fetch hotel rooms!', details: 'No rooms found or error fetching rooms.'});
+//     }
+
+//     res.json(data);
+//   } catch (error) {
+//     console.error('Hotel rooms API error:', error);
+//     res.status(500).json({error:'Failed to fetch hotel rooms!', details: error.toString()});
+//   }
+// });
+
+
+
+
 
 
 // Booking API Endpoints
@@ -1377,6 +2196,15 @@ app.get('/api/user-info', async (req, res) => {
     });
   }
 });
+
+
+// Getting user info and updating the info
+
+
+
+
+
+
 
 // Start server
 const port = 3001; // Ensure this matches the port in your frontend fetch calls

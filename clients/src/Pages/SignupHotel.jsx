@@ -431,7 +431,7 @@ const SignupHotel = () => {
               {/* Hotel contact address */}
                 <div className="field-group">
                 <label htmlFor="address" className="field-label">
-                    Hotel Address
+                    Hotel Owner Address
                 </label>
                 <div className="input-wrapper">
                     <textarea
@@ -510,26 +510,10 @@ const SignupHotel = () => {
                     </button>
                 </div>
               </div>
-
-              {/* User Type Selection */}
-              {/* <div className="input-wrapper">
-                <User className="input-icon" size={18} aria-hidden="true" />
-                <select
-                  id="userType"
-                  name="userType"
-                  className="form-input"
-                  required
-                  disabled={isLoading}
-                  aria-describedby="userType-help"
-                  onChange={handleUserTypeChange}  // <-- added this
-                >
-                  <option value="hotel_user">Hotel User / Guest</option>
-                  <option value="hotel_owner">Hotel Owner / Partner</option>
-                </select>
-              </div> */}
             <div
                 className="input-wrapper cursor-pointer signup-go-gack"
                 onClick={() => navigate('/signup')}
+                title='Back to User Sign Up'
                 >
                 <ArrowLeftFromLine className="input-icon" size={24} aria-hidden="true" />
             </div>

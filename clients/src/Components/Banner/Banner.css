@@ -128,3 +128,211 @@
     display: none;
   }
 }
+
+
+
+/* Add these styles to your existing Banner.css file */
+/* Search field with dropdown */
+.location-field {
+  position: relative;
+  .banner-search-input{
+    width: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .location-field {
+    .banner-search-input{
+      width: 100px;
+    }
+}
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.dropdown-icon.rotated {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Combined suggestions dropdown */
+.location-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: -1px;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+  gap: 10px;
+}
+
+.suggestion-item:hover {
+  background-color: #f8f9fa;
+}
+
+.suggestion-item.hotel:hover {
+  background-color: #e8f5e8;
+  border-left: 3px solid #28a745;
+}
+
+.suggestion-item.location:hover {
+  background-color: #e3f2fd;
+  border-left: 3px solid #2196f3;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item.loading {
+  cursor: default;
+  padding: 16px;
+  justify-content: center;
+}
+
+.suggestion-item.no-results {
+  cursor: default;
+  color: #666;
+  font-style: italic;
+  justify-content: center;
+}
+
+.suggestion-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.suggestion-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggestion-full {
+  font-size: 12px;
+  color: #666;
+}
+
+.suggestion-full.hotel {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.suggestion-full.location {
+  color: #2196f3;
+}
+
+/* Hotel rating in suggestions */
+.hotel-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background-color: #fff3cd;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #856404;
+  margin-left: auto;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Search button states */
+.banner-search-btn.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.banner-search-btn.active {
+  background-color: #00504B;
+  cursor: pointer;
+  opacity: 1;
+}
+
+.banner-search-btn.disabled:hover {
+  background-color: #ccc;
+  transform: none;
+}
+
+/* Form field validation styles */
+.search-field input:required:invalid {
+  border-color: #dc3545;
+}
+
+.search-field select:required:invalid {
+  border-color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .location-suggestions {
+    max-height: 200px;
+  }
+  
+  .suggestion-item {
+    padding: 10px 12px;
+  }
+  
+  .suggestion-name {
+    font-size: 13px;
+  }
+  
+  .suggestion-full {
+    font-size: 11px;
+  }
+}
+
+/* Focus states for better accessibility */
+.search-field input:focus + .dropdown-icon {
+  color: #00504B;
+}
+
+.suggestion-item:focus {
+  outline: 2px solid #007bff;
+  outline-offset: -2px;
+  background-color: #e3f2fd;
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star} from "lucide-react";
+import { Star, Plus, Minus } from "lucide-react";
 import "./CSS/Listing.css";
 import Navbar from "../Components/Navbar/Navbar";
 
@@ -10,6 +10,8 @@ const Listing = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedRooms, setSelectedRooms] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
 
   const navigate = useNavigate();
 
@@ -104,6 +106,19 @@ const Listing = () => {
     fetchHotelAndRooms();
   }, [hotelId]);
 
+  // Calculate total price whenever selectedRooms changes
+  useEffect(() => {
+    const total = Object.entries(selectedRooms).reduce((sum, [roomId, quantity]) => {
+      const room = rooms.find(r => (r.uuid || r.id) === roomId);
+      if (room && quantity > 0) {
+        const roomPrice = parseFloat(room.field_price_per_night?.replace(/[^0-9.]/g, '') || 0);
+        return sum + (roomPrice * quantity);
+      }
+      return sum;
+    }, 0);
+    setTotalPrice(total);
+  }, [selectedRooms, rooms]);
+
   const getFirstImage = (mediaString) => {
     if (!mediaString) return '';
     return mediaString.split(', ')[0].trim();
@@ -114,14 +129,67 @@ const Listing = () => {
     return amenities.split(' , ').join(' • ');
   };
 
-  // Handle room booking navigation
-  const handleBookRoom = (room) => {
-    // Navigate to booking page with room and hotel data
-    navigate('/booking', { 
-      state: { 
-        hotel: hotel,
-        room: room 
-      } 
+  const getRoomPrice = (room) => {
+    const priceString = room.field_price_per_night || "0";
+    return parseFloat(priceString.replace(/[^0-9.]/g, '') || 0);
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN'
+    }).format(price);
+  };
+
+  // Get room availability (defaults to 1 if not specified)
+  const getRoomAvailability = (room) => {
+    return parseInt(room.field_available_rooms || room.availability || room.rooms_available || 1);
+  };
+
+  const handleQuantityChange = (roomId, change) => {
+    setSelectedRooms(prev => {
+      const currentQuantity = prev[roomId] || 0;
+      const room = rooms.find(r => (r.uuid || r.id) === roomId);
+      const maxAvailable = getRoomAvailability(room);
+      
+      let newQuantity = currentQuantity + change;
+      
+      // Ensure quantity stays within bounds (0 to maxAvailable)
+      newQuantity = Math.max(0, Math.min(newQuantity, maxAvailable));
+      
+      if (newQuantity === 0) {
+        const { [roomId]: removed, ...rest } = prev;
+        return rest;
+      }
+      
+      return {
+        ...prev,
+        [roomId]: newQuantity
+      };
+    });
+  };
+
+  const getSelectedRoomCount = () => {
+    return Object.values(selectedRooms).reduce((sum, quantity) => sum + quantity, 0);
+  };
+
+  const handleProceedToBooking = () => {
+    const selectedRoomDetails = Object.entries(selectedRooms).map(([roomId, quantity]) => {
+      const room = rooms.find(r => (r.uuid || r.id) === roomId);
+      return {
+        room,
+        quantity,
+        totalPrice: getRoomPrice(room) * quantity
+      };
+    });
+
+    // Navigate to booking summary page with selected rooms data
+    navigate('/booking-summary', {
+      state: {
+        hotel,
+        selectedRooms: selectedRoomDetails,
+        totalPrice
+      }
     });
   };
 
@@ -154,47 +222,106 @@ const Listing = () => {
           {!Array.isArray(rooms) || rooms.length === 0 ? (
             <div className="listing-no-rooms">No rooms available for this hotel.</div>
           ) : (
-            rooms.map((room, idx) => (
-              <div className="listing-room-card" key={room.uuid || idx}>
-                <img 
-                  className="listing-room-img" 
-                  src={getFirstImage(room.field_media) || getFirstImage(hotel.field_media)} 
-                  alt={room.title || hotel.title} 
-                />
-                <div className="listing-room-info">
-                  <div className="listing-room-title">{room.title || "Room"}</div>
-                  <div className="listing-room-category">
-                    <strong>Category:</strong> {room.field_room_category || "Not specified"}
-                  </div>
-                  <div className="listing-room-desc">
-                    <strong>Description: </strong>{room.field_body || "No description provided."}
-                  </div>
-                  <div className="listing-room-meta">
-                    <span><strong>Capacity:</strong> {room.field_capacity || "Not specified"} guests</span>
-                    <span><strong>Room Size:</strong> {room.field_room_size || "Not specified"}</span>
-                  </div>
-                  {room.field_room_amenities && (
-                    <div className="listing-room-amenities">
-                      <strong>Amenities:</strong> {formatAmenities(room.field_room_amenities)}
+            rooms.map((room, idx) => {
+              const roomId = room.uuid || room.id || idx;
+              const quantity = selectedRooms[roomId] || 0;
+              const roomPrice = getRoomPrice(room);
+              const availableRooms = getRoomAvailability(room);
+              
+              return (
+                <div className="listing-room-card" key={roomId}>
+                  <img 
+                    className="listing-room-img" 
+                    src={getFirstImage(room.field_media) || getFirstImage(hotel.field_media)} 
+                    alt={room.title || hotel.title} 
+                  />
+                  <div className="listing-room-info">
+                    <div className="listing-room-title">{room.title || "Room"}</div>
+                    <div className="listing-room-category">
+                      <strong>Category:</strong> {room.field_room_category || "Not specified"}
                     </div>
-                  )}
-                  <button 
-                    className="book-room"
-                    onClick={() => handleBookRoom(room)}
-                  >
-                    Book Room
-                  </button>
+                    <div className="listing-room-desc">
+                      <strong>Description: </strong>{room.field_body || "No description provided."}
+                    </div>
+                    <div className="listing-room-meta">
+                      <span><strong>Capacity:</strong> {room.field_capacity || "Not specified"} guests</span>
+                      <span><strong>Room Size:</strong> {room.field_room_size || "Not specified"}</span>
+                    </div>
+                    <div className="room-availability">
+                      <strong>Available Rooms:</strong> {availableRooms}
+                    </div>
+                    {room.field_room_amenities && (
+                      <div className="listing-room-amenities">
+                        <strong>Amenities:</strong> {formatAmenities(room.field_room_amenities)}
+                      </div>
+                    )}
+                    
+                    {/* Room Quantity Selector */}
+                    <div className="room-quantity-selector">
+                      <div className="quantity-controls">
+                        <button 
+                          className="quantity-btn"
+                          onClick={() => handleQuantityChange(roomId, -1)}
+                          disabled={quantity === 0}
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <span className="quantity-display">{quantity}</span>
+                        <button 
+                          className="quantity-btn"
+                          onClick={() => handleQuantityChange(roomId, 1)}
+                          disabled={quantity >= availableRooms}
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      {quantity > 0 && (
+                        <div className="room-total-price">
+                          {quantity} × {formatPrice(roomPrice)} = {formatPrice(roomPrice * quantity)}
+                        </div>
+                      )}
+                      {quantity >= availableRooms && availableRooms > 0 && (
+                        <div className="max-rooms-notice">
+                          Maximum {availableRooms} room{availableRooms > 1 ? 's' : ''} available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="listing-room-price">
+                    {formatPrice(roomPrice)} <small>/night</small>
+                  </div>
                 </div>
-                <div className="listing-room-price">
-                  {room.field_price_per_night || "Price on request"} <small>/night</small>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
+
+        {/* Booking Summary Sticky Footer */}
+        {getSelectedRoomCount() > 0 && (
+          <div className="booking-summary-footer">
+            <div className="summary-content">
+              <div className="summary-info">
+                <div className="selected-rooms-count">
+                  {getSelectedRoomCount()} room{getSelectedRoomCount() > 1 ? 's' : ''} selected
+                </div>
+                <div className="total-price">
+                  Total: {formatPrice(totalPrice)} <small>/night</small>
+                </div>
+              </div>
+              <button 
+                className="proceed-booking-btn"
+                onClick={handleProceedToBooking}
+              >
+                Proceed to Booking
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
 };
 
 export default Listing;
+
+

@@ -1,6 +1,6 @@
 import './App.css';
 import Navbar from './Components/Navbar/Navbar';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate  } from 'react-router-dom';
 import Home from './Pages/Home';
 import Hotels from './Pages/Hotels';
 import About from './Pages/About';
@@ -15,6 +15,10 @@ import ProtectedRoute from './Components/ProtectedRoute';
 import UserProfilePage from './Pages/UserProfilePage';
 import SignupHotel from './Pages/SignupHotel';
 import HotelOwnerProfile from './Pages/HotelOwnerProfile';
+import BookingSummary from './Pages/BookingSummary';
+
+// import PrivateRoute from './Components/PrivateRoute'; // We'll create this
+
 
 function App() {
   return (
@@ -32,6 +36,10 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<SignUp />} />
         <Route path='/register-hotel-owner' element={<SignupHotel />} />
+       {/* <Route path="/hotel/:hotelId" element={<Listing />} />  new today 5/8 */}
+       <Route path="/booking-summary" element={<BookingSummary />} /> {/* new today 5/8 */}
+          {/* Existing payment route */}
+        {/* <Route path="/payment" element={<Payment />} /> */}
         <Route path="/booking" element={
           <ProtectedRoute>
             <BookingPage />
@@ -47,6 +55,14 @@ function App() {
             <UserProfilePage />
           </ProtectedRoute>
         } />
+        {/* <Route 
+            path="/user-profile" 
+            element={
+              <PrivateRoute>
+                <UserProfilePage />
+              </PrivateRoute>
+            } 
+        /> */}
         <Route path="/hotel-owner-profile" element={
           <ProtectedRoute>
             <HotelOwnerProfile />
