@@ -227,9 +227,9 @@
 }
 
 .quantity-btn:hover:not(:disabled) {
-  background-color: #007bff;
+  background-color: #00504B;
   color: white;
-  border-color: #007bff;
+  border-color: #00504B;
 }
 
 .quantity-btn:disabled {
@@ -295,7 +295,7 @@
 }
 
 .proceed-booking-btn {
-  background-color: #007bff;
+  background-color: #003c38;
   color: white;
   border: none;
   padding: 15px 30px;
@@ -308,7 +308,7 @@
 }
 
 .proceed-booking-btn:hover {
-  background-color: #0056b3;
+  background-color: #00504B;
 }
 
 /* Updated Room Card Styles */

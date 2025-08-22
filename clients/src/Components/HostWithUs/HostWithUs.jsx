@@ -13,7 +13,8 @@ const HostWithUs = () => {
         <div className="hosting-content">
         <div className="hosting-text">
             <h2>Try Hosting With Us</h2>
-            <p>Learn about us and join hundreds of hotel owners to register their hotels for users to see</p>
+            <p>Join our community of hosts and earn extra income by sharing your space with travelers from around the world. Whether you have a spare room, an entire home, or a unique property, we provide the platform to connect you with guests looking for a place to stay.</p>
+            <p>Sign up today and start hosting with us!</p>
             <Link to='/about'>
                 <button className="hosting-btn">Learn More</button>
             </Link>

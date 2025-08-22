@@ -6,6 +6,18 @@ import { useNavigate, useLocation } from "react-router-dom";
 import './CSS/Hotels.css';
 
 const Hotels = () => {
+
+  //  NEW- Function to get state ID based on city name
+  const getCityDisplayName = (cityName) => {
+  const cityMapping = {
+    'Port Harcourt': 'PortHarcourt',
+    'PortHarcourt': 'Port Harcourt',
+    'Benin City': 'Benin',
+    'Benin': 'Benin City'
+  };
+  return cityMapping[cityName] || cityName;
+};
+
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -71,6 +83,7 @@ const Hotels = () => {
     const hotel = urlParams.get('hotel') || '';
     const hotelId = urlParams.get('hotelId') || '';
     const locationSearch = urlParams.get('location') || '';
+      const city = urlParams.get('city') || ''; //NEW- Add this line to handle city parameter
     const title = urlParams.get('title') || ''; 
     const checkIn = urlParams.get('checkIn') || '';
     const checkOut = urlParams.get('checkOut') || '';
@@ -78,6 +91,7 @@ const Hotels = () => {
     const state = urlParams.get('state') || '';
     const rating = urlParams.get('rating') || '';
     const amenities = urlParams.get('amenities') || '';
+
 
     // Determine search type and destination
     let destination = '';
@@ -89,7 +103,12 @@ const Hotels = () => {
       destination = hotel;
       searchTerm = hotel;
       searchType = 'hotel';
-    } else if (locationSearch) {
+    } else if (city) {
+    // NEW- City-based search from TrendingDestinations
+    destination = getCityDisplayName(city);
+    searchTerm = city;
+    searchType = 'location';
+      }else if (locationSearch) {
       // Location-based search
       destination = locationSearch;
       searchTerm = locationSearch;
@@ -172,19 +191,32 @@ const Hotels = () => {
         
         if (hasFilters) {
           // For hotel name searches, use title-based search
-          if (searchParams.title && (searchType === 'hotel' || searchType === 'general')) {
+          // NEW- change "hotel" to  "location"
+          if (searchParams.title && (searchType === 'location' || searchType === 'general')) {
             // First try exact hotel name match
             const allHotelsResponse = await fetch("http://localhost:3001/api/hotels");
             if (allHotelsResponse.ok) {
               const allHotels = await allHotelsResponse.json();
               
               // Filter hotels by title (case-insensitive)
-              const filteredHotels = allHotels.filter(hotel => 
-                hotel.title?.toLowerCase().includes(searchParams.title.toLowerCase()) ||
-                hotel.field_city?.toLowerCase().includes(searchParams.title.toLowerCase()) ||
-                hotel.field_state?.toLowerCase().includes(searchParams.title.toLowerCase()) ||
-                hotel.field_location?.toLowerCase().includes(searchParams.title.toLowerCase())
-              );
+              //NEW- Enhanced filtering for city searches
+                  const filteredHotels = allHotels.filter(hotel => {
+                    const searchTerm = searchParams.title.toLowerCase();
+                    const cityVariations = [
+                      searchTerm,
+                      getCityDisplayName(searchTerm).toLowerCase(),
+                      // Handle common variations
+                      searchTerm.replace(/\s+/g, ''),
+                      searchTerm.replace(/\s+/g, '-')
+                    ];
+                    
+                    return cityVariations.some(variation => 
+                      hotel.title?.toLowerCase().includes(variation) ||
+                      hotel.field_city?.toLowerCase().includes(variation) ||
+                      hotel.field_state?.toLowerCase().includes(variation) ||
+                      hotel.field_location?.toLowerCase().includes(variation)
+                    );
+                  });
               
               console.log('Filtered hotels by title/location:', filteredHotels);
               setHotels(filteredHotels);
@@ -193,7 +225,6 @@ const Hotels = () => {
               return;
             }
           }
-          
           // Try advanced search endpoint if available
           try {
             url = "http://localhost:3001/api/search/`hotels-advanced`";
@@ -234,19 +265,25 @@ const Hotels = () => {
       
       // Additional client-side filtering if needed
       let finalHotels = hotelsArray;
-      
+      // NEW- Commented out the old filtering logic
       if (searchParams && searchParams.title) {
-        finalHotels = hotelsArray.filter(hotel => {
-          const searchTerm = searchParams.title.toLowerCase();
-          return (
-            hotel.title?.toLowerCase().includes(searchTerm) ||
-            hotel.field_city?.toLowerCase().includes(searchTerm) ||
-            hotel.field_state?.toLowerCase().includes(searchTerm) ||
-            hotel.field_location?.toLowerCase().includes(searchTerm)
-          );
-        });
-      }
-      
+      finalHotels = hotelsArray.filter(hotel => {
+        const searchTerm = searchParams.title.toLowerCase();
+        const cityVariations = [
+          searchTerm,
+          getCityDisplayName(searchTerm).toLowerCase(),
+          searchTerm.replace(/\s+/g, ''),
+          searchTerm.replace(/\s+/g, '-')
+        ];
+        
+        return cityVariations.some(variation => 
+          hotel.title?.toLowerCase().includes(variation) ||
+          hotel.field_city?.toLowerCase().includes(variation) ||
+          hotel.field_state?.toLowerCase().includes(variation) ||
+          hotel.field_location?.toLowerCase().includes(variation)
+        );
+      });
+    }      
       setHotels(finalHotels);
     } catch (err) {
       console.error("Error fetching hotels:", err);
@@ -538,13 +575,19 @@ const Hotels = () => {
             )}
           </form>
         </div>
-
-        {/* Results Section */}
         <div className="hotels-results-section">
           <h3>
-            {searchLoading ? 'Searching...' : `Found ${hotels.length} hotel${hotels.length !== 1 ? 's' : ''}`}
+            {searchLoading ? (
+              <>
+              <div className="loading-spinner"></div>
+              <h4>Searching...</h4>
+              </>
+              
+            ) : (
+              `Found ${hotels.length} hotel${hotels.length !== 1 ? 's' : ''}`
+            )}
           </h3>
-          {hotels.length > 0 && (
+          {hotels.length > 0 && !searchLoading && (
             <p>Click "View Rooms" to see available rooms and book.</p>
           )}
         </div>

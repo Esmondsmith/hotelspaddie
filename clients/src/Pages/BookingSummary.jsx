@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Star, Calendar, Users, ArrowLeft } from "lucide-react";
+import { Star, Calendar, Users, Undo2 } from "lucide-react";
 import "./CSS/BookingSummary.css";
 import Navbar from "../Components/Navbar/Navbar";
 // import { bookingService } from "../Services/bookingService";
@@ -204,7 +204,7 @@ const BookingSummary = () => {
       <div className="booking-summary-page">
         <div className="booking-summary-header">
           <button className="back-btn" onClick={handleGoBack}>
-            <ArrowLeft size={20} />
+            <Undo2 size={20}/>
             Back to Hotel
           </button>
           <h1>Booking Summary</h1>

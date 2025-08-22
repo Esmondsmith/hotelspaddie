@@ -104,7 +104,7 @@ const BestHotels = () => {
         <h1>Best Hotels by Rating</h1>
         <hr />
       </div>
-      
+  
       {hotels.length === 0 ? (
         <div className="no-hotels">
           <p>No hotels available at the moment.</p>
@@ -151,14 +151,14 @@ const BestHotels = () => {
                     <div className="hotel-amenities">
                       <h4>Key Amenities:</h4>
                       <div className="amenities-list">
-                        {amenities.slice(0, 4).map((amenity, idx) => (
+                        {amenities.slice(0, 3).map((amenity, idx) => (
                           <span key={idx} className="amenity-item">
                             {getAmenityIcon(amenity)}
                             {amenity.trim()}
                           </span>
                         ))}
-                        {amenities.length > 4 && (
-                          <span className="amenity-more">+{amenities.length - 4} more</span>
+                        {amenities.length > 3 && (
+                          <span className="amenity-more">+{amenities.length - 3} more</span>
                         )}
                       </div>
                     </div>

@@ -7,14 +7,18 @@ import Navbar from "../Components/Navbar/Navbar";
 import HostWithUs from "../Components/HostWithUs/HostWithUs";
 import DownloadApp from "../Components/DownloadApp/DownloadApp";
 import Carousel from "../Components/Carousel/Carousel";
+import TrendingDestinations from "../Components/TrendingDestinations/TrendingDestinations";
+
+
 
 const Home = () => {
   return (
     <div>
       <Navbar />
       <Banner />
-      <HostWithUs />
+      <HostWithUs /> 
       <BestHotels />
+     <TrendingDestinations />
       <DownloadApp />
       <Carousel />
       <Footer />

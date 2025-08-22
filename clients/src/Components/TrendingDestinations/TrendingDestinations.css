@@ -1,0 +1,85 @@
+.trending-destinations {
+  padding: 20px 0 60px;
+  background-color: #7c1717;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: rgba(203, 236, 227, 0.2);
+}
+
+.trending-destinations h2.section-title {
+  display: flex;
+  justify-content: flex-start;
+  font-size: 2rem;
+  color: rgba(113, 155, 144, 0.2);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  /* For text repetition */
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.trending-destinations h2.section-title::after {
+  content: " ● Trending Destinations ● Trending Destinations ● Trending Destinations ● Trending Destinations";
+}
+
+@media (max-width: 768px) {
+  .trending-destinations {
+    padding: 20px 20px 40px;
+  }
+
+  .trending-destinations h2.section-title {
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    color: #000;
+  }
+  .trending-destinations h2.section-title::after {
+    content: "";
+  }
+}
+
+.destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.destination-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 300px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.destination-card:hover {
+  transform: scale(1.03);
+}
+
+.destination-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.destination-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.destination-overlay h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -16,6 +16,11 @@ import UserProfilePage from './Pages/UserProfilePage';
 import SignupHotel from './Pages/SignupHotel';
 import HotelOwnerProfile from './Pages/HotelOwnerProfile';
 import BookingSummary from './Pages/BookingSummary';
+import TermsCondition from './Pages/TermsCondition';
+import PrivacyPolicy from './Pages/PrivacyPolicy';
+// import Spinner from './Components/Spinner';
+// import RouteLoader from './Components/RouteLoader';
+import AppLoader from './Components/AppLoader'; // New component for loading spinner
 
 // import PrivateRoute from './Components/PrivateRoute'; // We'll create this
 
@@ -26,7 +31,9 @@ function App() {
 
       <BrowserRouter>
       {/* <Navbar /> */}
-
+      {/* <Spinner /> */}
+      {/* <RouteLoader> */}
+      <AppLoader>
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/hotels' element={<Hotels category="hotel"/>} />
@@ -69,8 +76,12 @@ function App() {
           </ProtectedRoute>
         } />
         {/* <Route path="/book/:hotelId/:roomId" element={<BookingPage />} /> */}
+
+        <Route path="/terms-conditions" element={<TermsCondition />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
-      
+      </AppLoader>
+      {/* </RouteLoader> */}
       {/* <Footer /> */}
       </BrowserRouter>
     </div>

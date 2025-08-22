@@ -412,7 +412,7 @@ const Banner = () => {
                 style={!isSearchValid() ? { backgroundColor: '#00504B' } : {}}
               >
                 <Search size={20} />
-                Search
+                Search Hotel
               </button>
 
             </form>
