@@ -29,6 +29,7 @@ const Banner = () => {
         if (response.ok) {
           const hotelsData = await response.json();
           setHotels(hotelsData);
+          console.log('Hotels loaded in Banner:', hotelsData.length);
         }
       } catch (error) {
         console.error('Error fetching hotels:', error);
@@ -49,14 +50,20 @@ const Banner = () => {
     if (!query || query.trim().length < 2) return [];
     
     const searchTerm = query.toLowerCase().trim();
+    console.log('Searching hotels with term:', searchTerm);
     
     return hotels
-      .filter(hotel => 
-        hotel.title?.toLowerCase().includes(searchTerm) ||
-        hotel.field_city?.toLowerCase().includes(searchTerm) ||
-        hotel.field_state?.toLowerCase().includes(searchTerm) ||
-        hotel.field_location?.toLowerCase().includes(searchTerm)
-      )
+      .filter(hotel => {
+        const matches = hotel.title?.toLowerCase().includes(searchTerm) ||
+                       hotel.field_city?.toLowerCase().includes(searchTerm) ||
+                       hotel.field_state?.toLowerCase().includes(searchTerm) ||
+                       hotel.field_location?.toLowerCase().includes(searchTerm);
+        
+        if (matches) {
+          console.log('Hotel match found:', hotel.title);
+        }
+        return matches;
+      })
       .slice(0, 5) // Limit to 5 hotel results
       .map(hotel => ({
         id: hotel.uuid || hotel.id || hotel.nid,
@@ -136,11 +143,13 @@ const Banner = () => {
     setIsLoadingSuggestions(true);
     
     try {
-      // Search hotels locally
+      // Search hotels locally first
       const hotelResults = searchHotels(query);
+      console.log('Hotel search results:', hotelResults);
       
       // Search locations via API
       const locationResults = await fetchLocationSuggestions(query);
+      console.log('Location search results:', locationResults);
       
       // Combine results with hotels first, then locations
       const combinedResults = [
@@ -160,6 +169,7 @@ const Banner = () => {
         )
         .slice(0, 10); // Limit to 10 total results
       
+      console.log('Final combined results:', uniqueResults);
       setSuggestions(uniqueResults);
     } catch (error) {
       console.error('Error performing search:', error);
@@ -230,6 +240,7 @@ const Banner = () => {
   };
 
   const handleSuggestionSelect = (suggestion) => {
+    console.log('Selected suggestion:', suggestion);
     setSearchData(prev => ({
       ...prev,
       destination: suggestion.name
@@ -258,20 +269,29 @@ const Banner = () => {
       return;
     }
     
+    console.log('Starting search with destination:', searchData.destination);
+    
     // Create URL search parameters
     const searchParams = new URLSearchParams();
     
     // Check if the search term matches any hotel exactly
+    const searchTerm = searchData.destination.toLowerCase().trim();
     const matchedHotel = hotels.find(hotel => 
-      hotel.title?.toLowerCase() === searchData.destination.toLowerCase().trim()
+      hotel.title?.toLowerCase() === searchTerm ||
+      hotel.title?.toLowerCase().includes(searchTerm)
     );
     
+    console.log('Looking for hotel match:', searchTerm);
+    console.log('Matched hotel:', matchedHotel);
+    
     if (matchedHotel) {
-      // If it's an exact hotel match, search by hotel ID or navigate directly
+      // If it's an exact hotel match, search by hotel
+      console.log('Hotel match found, navigating with hotel parameters');
       searchParams.append('hotel', matchedHotel.title);
       searchParams.append('hotelId', matchedHotel.uuid || matchedHotel.id || matchedHotel.nid);
     } else {
       // Otherwise search by location/title
+      console.log('No exact hotel match, searching by location');
       searchParams.append('location', searchData.destination.trim());
     }
     
@@ -291,6 +311,7 @@ const Banner = () => {
     
     // Navigate to hotels page with search parameters
     const queryString = searchParams.toString();
+    console.log('Navigating to:', `/hotels?${queryString}`);
     navigate(`/hotels?${queryString}`);
   };
 

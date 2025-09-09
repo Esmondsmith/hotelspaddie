@@ -31,7 +31,7 @@ const TrendingDestinations = () => {
 
   return (
     <section className="trending-destinations">
-      <h2 className="section-title">Trending Destinations </h2>
+      <h2 className="section-title">Trending Destinations</h2>
       <div className="destinations-grid">
         {destinations.map((dest, index) => {
           // Create the search URL with location parameter and state filter

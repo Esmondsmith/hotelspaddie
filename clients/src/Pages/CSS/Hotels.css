@@ -313,3 +313,100 @@ body{
 }
 
 
+/* Pagination Styles - Add these to your Hotels.css file */
+
+.pagination-container {
+  margin: 40px 0;
+  padding: 20px 0;
+  border-top: 1px solid #eee;
+}
+
+.pagination-arrow {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  gap: 4px;
+}
+
+.pagination-arrow:hover:not(:disabled) {
+  background-color: #f0f0f0 !important;
+  border-color: #00504B;
+}
+
+.pagination-arrow:disabled {
+  opacity: 0.5;
+}
+
+.pagination-numbers {
+  margin: 0 16px;
+}
+
+.pagination-number {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.pagination-number:hover:not(.active) {
+  background-color: #f0f0f0 !important;
+  border-color: #00504B;
+}
+
+.pagination-number.active {
+  font-weight: 600;
+}
+
+/* Loading spinner styles */
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 2px solid #00504B;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+  .pagination-container {
+    margin: 20px 0;
+    padding: 16px 0;
+  }
+  
+  .pagination-arrow,
+  .pagination-number {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .pagination-number {
+    min-width: 32px;
+  }
+  
+  .pagination-numbers {
+    margin: 0 8px;
+    gap: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .pagination-numbers {
+    margin: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
